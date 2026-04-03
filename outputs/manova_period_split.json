@@ -1,0 +1,100 @@
+{
+  "method": "MANOVA Period Split Analysis",
+  "description": "分期MANOVA：检验Pre/Post-AUKUS差异是否均显著，以及F值变化",
+  "n_pc": 88,
+  "aukus_date": "2021-09 (month-level coding)",
+  "results": [
+    {
+      "test": "1. 全样本（原始）",
+      "n": 37866,
+      "F": 82.7212876903395,
+      "p": 0.0,
+      "conclusion": "支持H1***"
+    },
+    {
+      "test": "1b. 全样本（时间残差）",
+      "n": 37866,
+      "F": 58.60035356297565,
+      "p": 0.0,
+      "conclusion": "支持H1***"
+    },
+    {
+      "test": "2. Pre-AUKUS（原始）",
+      "n": 20784,
+      "F": 42.17711756122052,
+      "p": 0.0,
+      "n_per_country": {
+        "US": 13232,
+        "UK": 6708,
+        "AU": 844
+      },
+      "conclusion": "支持H1***"
+    },
+    {
+      "test": "2b. Pre-AUKUS（时间残差）",
+      "n": 20784,
+      "F": 23.20946475837008,
+      "p": 0.0,
+      "conclusion": "支持H1***"
+    },
+    {
+      "test": "3. Post-AUKUS（原始）",
+      "n": 17082,
+      "F": 46.055815614820006,
+      "p": 0.0,
+      "n_per_country": {
+        "US": 7128,
+        "UK": 4516,
+        "AU": 5438
+      },
+      "conclusion": "支持H1***"
+    },
+    {
+      "test": "3b. Post-AUKUS（时间残差）",
+      "n": 17082,
+      "F": 45.05778778782839,
+      "p": 0.0,
+      "conclusion": "支持H1***"
+    },
+    {
+      "test": "4. Pre-AUKUS 2017+（原始）",
+      "n": 11963,
+      "F": 24.876442615616806,
+      "p": 0.0,
+      "n_per_country": {
+        "US": 8286,
+        "UK": 2833,
+        "AU": 844
+      },
+      "conclusion": "支持H1***"
+    },
+    {
+      "test": "5. Pre-AUKUS US vs UK",
+      "n": 19940,
+      "F": 82.15516958857675,
+      "p": 0.0,
+      "n_per_country": {
+        "US": 13232,
+        "UK": 6708
+      },
+      "conclusion": "支持H1***"
+    },
+    {
+      "test": "6. Pre-AUKUS US vs UK（2014+重叠）",
+      "n": 17601,
+      "F": 58.600340507072644,
+      "p": 0.0,
+      "n_per_country": {
+        "US": 13232,
+        "UK": 4369
+      },
+      "conclusion": "支持H1***"
+    }
+  ],
+  "interpretation": {
+    "pre_aukus_significant": true,
+    "post_aukus_significant": true,
+    "f_ratio_post_over_pre": 1.0919621415088292,
+    "f_ratio_post_over_pre_residualized": 1.9413540233227096
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "method": "Event Study for Parallel Trends Test",
+  "base_year": 2021,
+  "n_samples": 26479,
+  "pca_explained_variance": [
+    0.07001904678761467,
+    0.054299057144752444,
+    0.04857061372206734
+  ],
+  "parallel_trends_test": {
+    "PC1": {
+      "UK": {
+        "n_years": 7,
+        "wald_stat": 2.2506750970197853,
+        "df": 7,
+        "p_value": 0.9446740713124946,
+        "n_significant": 0,
+        "joint_test_pass": true,
+        "individual_test_pass": true,
+        "parallel_trends_satisfied": true,
+        "conclusion": "satisfied"
+      }
+    },
+    "PC2": {
+      "UK": {
+        "n_years": 7,
+        "wald_stat": 13.292167857431565,
+        "df": 7,
+        "p_value": 0.06530175852839004,
+        "n_significant": 1,
+        "joint_test_pass": true,
+        "individual_test_pass": true,
+        "parallel_trends_satisfied": true,
+        "conclusion": "marginal"
+      }
+    },
+    "PC3": {
+      "UK": {
+        "n_years": 7,
+        "wald_stat": 12.254686430226089,
+        "df": 7,
+        "p_value": 0.09248835707536107,
+        "n_significant": 1,
+        "joint_test_pass": true,
+        "individual_test_pass": true,
+        "parallel_trends_satisfied": true,
+        "conclusion": "marginal"
+      }
+    }
+  },
+  "interpretation": "英国样本：平行趋势假设得到满足。AUKUS前的年份系数均不显著异于零，表明英国与美国在AUKUS之前的概念化趋势是平行的。DID估计对英国样本有效。"
+}

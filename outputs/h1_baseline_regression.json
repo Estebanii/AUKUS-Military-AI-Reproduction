@@ -1,0 +1,260 @@
+{
+  "method": "H1 Baseline Differentiation: Pre-AUKUS PC Regression",
+  "description": "Pre-AUKUS子样本PCA + 国别回归，检验AUKUS签署前的基线跨国差异",
+  "pca_basis": "Pre-AUKUS (independent of full sample)",
+  "n_bootstrap": 1000,
+  "seed_base": 42,
+  "pre_aukus_pca": {
+    "n_components": 3,
+    "explained_variance_ratio": {
+      "PC1": 0.07111817575821082,
+      "PC2": 0.053035203662541164,
+      "PC3": 0.04506033312023088
+    },
+    "cumulative_variance": 0.16921371254098286,
+    "n_samples_fit": 20784
+  },
+  "pca_axis_stability": {
+    "description": "Cosine similarity between Pre-AUKUS PCA and Full-Sample PCA axes",
+    "PC1": 0.9955023224017481,
+    "PC2": 0.9952469351204669,
+    "PC3": 0.9831895307359864
+  },
+  "main_analysis": {
+    "description": "Pre-AUKUS US vs UK (主分析)",
+    "sample": "US + UK, Pre-AUKUS only",
+    "PC1": {
+      "intercept": {
+        "coef": 0.004386298573429153,
+        "se_ols": 0.0029902779877442557,
+        "se_bootstrap": 0.004903418062237224,
+        "p_ols": 0.1424317899768195,
+        "p_bootstrap": 0.378,
+        "t_stat_ols": 1.4668531124552735
+      },
+      "UK": {
+        "coef": -0.0066175286361184376,
+        "se_ols": 0.005155580992928421,
+        "se_bootstrap": 0.00790867208433903,
+        "p_ols": 0.19930875895030398,
+        "p_bootstrap": 0.395,
+        "t_stat_ols": -1.2835660316839705
+      },
+      "_meta": {
+        "r_squared": 8.262642327250269e-05,
+        "n_obs": 19940,
+        "n_clusters": 6354,
+        "feature_names": [
+          "intercept",
+          "UK"
+        ]
+      }
+    },
+    "PC2": {
+      "intercept": {
+        "coef": -0.0056500893671320605,
+        "se_ols": 0.0025677451507928684,
+        "se_bootstrap": 0.0033922230526624076,
+        "p_ols": 0.027789320465305245,
+        "p_bootstrap": 0.098,
+        "t_stat_ols": -2.2004089328675884
+      },
+      "UK": {
+        "coef": 0.012125544654265087,
+        "se_ols": 0.004427086093122135,
+        "se_bootstrap": 0.006776731512469493,
+        "p_ols": 0.006169146176527196,
+        "p_bootstrap": 0.067,
+        "t_stat_ols": 2.738944849774478
+      },
+      "_meta": {
+        "r_squared": 0.0003761158259253383,
+        "n_obs": 19940,
+        "n_clusters": 6354,
+        "feature_names": [
+          "intercept",
+          "UK"
+        ]
+      }
+    },
+    "PC3": {
+      "intercept": {
+        "coef": 0.008191753463267362,
+        "se_ols": 0.0023782413158927357,
+        "se_bootstrap": 0.004083543812899747,
+        "p_ols": 0.0005733812706709696,
+        "p_bootstrap": 0.039,
+        "t_stat_ols": 3.444458478004521
+      },
+      "UK": {
+        "coef": -0.02216395765065682,
+        "se_ols": 0.004100359824426567,
+        "se_bootstrap": 0.007931274101359536,
+        "p_ols": 6.541770503076805e-08,
+        "p_bootstrap": 0.004,
+        "t_stat_ols": -5.405368943140602
+      },
+      "_meta": {
+        "r_squared": 0.0014632991632506087,
+        "n_obs": 19940,
+        "n_clusters": 6354,
+        "feature_names": [
+          "intercept",
+          "UK"
+        ]
+      }
+    }
+  },
+  "exploratory_analysis": {
+    "description": "Pre-AUKUS 三国含AU (探索性)",
+    "sample": "US + UK + AU, Pre-AUKUS only",
+    "note": "AU Pre-AUKUS仅844条观测(60%集中于2021)，结果仅供参考",
+    "PC1": {
+      "intercept": {
+        "coef": 0.004386298573429144,
+        "se_ols": 0.002982513738249283,
+        "se_bootstrap": 0.004847011196040422,
+        "p_ols": 0.1413950616572115,
+        "p_bootstrap": 0.379,
+        "t_stat_ols": 1.4706717079546041
+      },
+      "UK": {
+        "coef": -0.00661752863611844,
+        "se_ols": 0.005142194539466671,
+        "se_bootstrap": 0.007892229792210824,
+        "p_ols": 0.19814087093644495,
+        "p_bootstrap": 0.4,
+        "t_stat_ols": -1.2869074838239756
+      },
+      "AU": {
+        "coef": -0.055419961444390084,
+        "se_ols": 0.012180100131055988,
+        "se_bootstrap": 0.0149769727843046,
+        "p_ols": 5.393879921600231e-06,
+        "p_bootstrap": 0.0,
+        "t_stat_ols": -4.550041530700068
+      },
+      "_meta": {
+        "r_squared": 0.0010153679470680244,
+        "n_obs": 20784,
+        "n_clusters": 6629,
+        "feature_names": [
+          "intercept",
+          "UK",
+          "AU"
+        ]
+      }
+    },
+    "PC2": {
+      "intercept": {
+        "coef": -0.005650089367132059,
+        "se_ols": 0.002575566717296726,
+        "se_bootstrap": 0.003306181244322343,
+        "p_ols": 0.028266101085370865,
+        "p_bootstrap": 0.093,
+        "t_stat_ols": -2.1937266579769688
+      },
+      "UK": {
+        "coef": 0.012125544654265078,
+        "se_ols": 0.004440571367657642,
+        "se_bootstrap": 0.0069256610003020445,
+        "p_ols": 0.006326723373924148,
+        "p_bootstrap": 0.08,
+        "t_stat_ols": 2.73062713113452
+      },
+      "AU": {
+        "coef": 0.042764578039885454,
+        "se_ols": 0.010518194806138153,
+        "se_bootstrap": 0.018339500843905752,
+        "p_ols": 4.805006561592329e-05,
+        "p_bootstrap": 0.016,
+        "t_stat_ols": 4.065771629836056
+      },
+      "_meta": {
+        "r_squared": 0.00102210745104514,
+        "n_obs": 20784,
+        "n_clusters": 6629,
+        "feature_names": [
+          "intercept",
+          "UK",
+          "AU"
+        ]
+      }
+    },
+    "PC3": {
+      "intercept": {
+        "coef": 0.008191753463267355,
+        "se_ols": 0.002373375229195129,
+        "se_bootstrap": 0.00434196597348323,
+        "p_ols": 0.0005585455056629218,
+        "p_bootstrap": 0.059,
+        "t_stat_ols": 3.4515205865889915
+      },
+      "UK": {
+        "coef": -0.022163957650656804,
+        "se_ols": 0.004091970134842206,
+        "se_bootstrap": 0.008078444071597479,
+        "p_ols": 6.146841013965343e-08,
+        "p_bootstrap": 0.005,
+        "t_stat_ols": -5.416451469656556
+      },
+      "AU": {
+        "coef": -0.025570587748749096,
+        "se_ols": 0.00969247771416249,
+        "se_bootstrap": 0.014302011554690342,
+        "p_ols": 0.008341223065195136,
+        "p_bootstrap": 0.071,
+        "t_stat_ols": -2.6381889649728856
+      },
+      "_meta": {
+        "r_squared": 0.0015808039321886236,
+        "n_obs": 20784,
+        "n_clusters": 6629,
+        "feature_names": [
+          "intercept",
+          "UK",
+          "AU"
+        ]
+      }
+    }
+  },
+  "robustness_year_fe": {
+    "description": "Pre-AUKUS US-UK + 年份固定效应",
+    "PC1": {
+      "UK": {
+        "coef": -0.018799714850259913,
+        "se_bootstrap": 0.009100609827503114,
+        "p_bootstrap": 0.04
+      },
+      "_meta": {
+        "n_obs": 19940,
+        "n_year_dummies": 17,
+        "base_year": 2004
+      }
+    },
+    "PC2": {
+      "UK": {
+        "coef": 0.007431353513189255,
+        "se_bootstrap": 0.0077366776832598705,
+        "p_bootstrap": 0.329
+      },
+      "_meta": {
+        "n_obs": 19940,
+        "n_year_dummies": 17,
+        "base_year": 2004
+      }
+    },
+    "PC3": {
+      "UK": {
+        "coef": -0.06425377779038056,
+        "se_bootstrap": 0.008317986892391108,
+        "p_bootstrap": 0.0
+      },
+      "_meta": {
+        "n_obs": 19940,
+        "n_year_dummies": 17,
+        "base_year": 2004
+      }
+    }
+  }
+}

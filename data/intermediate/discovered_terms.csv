@@ -1,0 +1,57 @@
+term,total_count,n_articles,ai_similarity,category,contains_ai_keyword,count_UK,count_US,count_AU,pos_type
+uncrewed,157,157,1.0,autonomous_systems,True,72,24,61,adjective
+autonomous,365,365,1.0,autonomous_systems,True,154,132,79,adjective
+lethal,162,162,1.0,ethics_governance,True,48,98,16,adjective
+artificial intelligence,508,508,1.0,ai_core,True,104,358,46,noun_phrase
+lethality,110,110,1.0,ethics_governance,True,25,70,15,noun
+unmanned,361,361,1.0,autonomous_systems,True,92,231,38,adjective
+unmanned aerial,147,147,1.0,autonomous_systems,True,29,94,24,adjective_phrase
+drones,156,156,1.0,autonomous_systems,True,74,55,27,noun
+drone,122,122,1.0,autonomous_systems,True,51,44,27,noun
+cyber,398,398,1.0,ai_applications,True,90,280,28,adjective
+autonomy,207,207,1.0,autonomous_systems,True,85,95,27,noun
+surveillance,142,142,1.0,ai_applications,True,41,71,30,noun
+autonomous systems,206,206,1.0,autonomous_systems,True,80,60,66,adjective_phrase
+machine learning,143,143,1.0,ai_core,True,39,90,14,noun_phrase
+robotics,123,123,1.0,autonomous_systems,True,32,58,33,noun
+robotic,96,96,1.0,autonomous_systems,True,34,25,37,adjective
+targeting,95,95,1.0,ai_applications,True,34,48,13,noun
+uas,85,85,1.0,autonomous_systems,True,23,28,34,noun
+automated,84,84,1.0,ai_applications,True,30,47,7,adjective
+intelligence ai,81,81,1.0,ai_applications,True,44,21,16,noun_phrase
+artificial intelligence ai,81,81,1.0,ai_core,True,44,21,16,noun_phrase
+algorithms,77,77,1.0,ai_core,True,31,39,7,noun
+automation,74,74,1.0,ai_applications,True,26,40,8,noun
+unmanned aircraft,72,72,1.0,unknown,True,3,65,4,adjective_phrase
+unmanned aerial systems,70,70,1.0,unknown,True,8,43,19,adjective_phrase
+reconnaissance,67,67,1.0,unknown,True,24,30,13,noun
+unmanned systems,50,50,1.0,unknown,True,9,35,6,adjective_phrase
+cyber capabilities,48,48,1.0,unknown,True,11,32,5,adjective_phrase
+uncrewed aerial,45,45,1.0,unknown,True,16,4,25,adjective_phrase
+ai capabilities,44,44,1.0,unknown,True,7,32,5,noun_phrase
+isr,35,35,1.0,unknown,True,19,9,7,noun
+robots,33,33,1.0,autonomous_systems,True,16,10,7,noun
+uncrewed systems,32,32,1.0,autonomous_systems,True,18,4,10,adjective_phrase
+algorithm,32,32,1.0,ai_core,True,6,23,3,noun
+uavs,31,31,1.0,autonomous_systems,True,20,6,5,noun
+ai systems,29,29,1.0,ai_applications,True,7,19,3,noun_phrase
+unmanned aerial system,27,27,1.0,autonomous_systems,True,8,13,6,adjective_phrase
+responsible ai,27,27,1.0,ethics_governance,True,5,18,4,adjective_phrase
+robot,27,27,1.0,autonomous_systems,True,12,9,6,noun
+use of artificial intelligence,26,26,1.0,ai_applications,True,3,20,3,noun_phrase
+uncrewed aerial systems,24,24,1.0,autonomous_systems,True,6,4,14,adjective_phrase
+uav,23,23,1.0,autonomous_systems,True,10,7,6,noun
+ai and autonomy,22,22,1.0,ai_core,True,10,8,4,noun_phrase
+human-machine teaming,21,21,1.0,ai_applications,True,7,10,4,noun_phrase
+the drone,20,20,1.0,autonomous_systems,True,7,4,9,noun_phrase
+autonomous underwater,19,19,1.0,autonomous_systems,True,5,3,11,adjective_phrase
+ai and machine learning,19,19,1.0,ai_core,True,4,11,4,noun_phrase
+ai models,18,18,1.0,ai_core,True,4,11,3,noun_phrase
+a drone,17,17,1.0,autonomous_systems,True,7,4,6,noun_phrase
+drone technology,17,17,1.0,autonomous_systems,True,5,8,4,noun_phrase
+uncrewed aircraft,16,16,1.0,autonomous_systems,True,5,5,6,adjective_phrase
+autonomous capabilities,14,14,1.0,autonomous_systems,True,8,3,3,adjective_phrase
+ai algorithms,13,13,1.0,ai_core,True,7,3,3,noun_phrase
+safety,87,87,0.7147308200606045,ethics_governance,False,26,43,18,noun
+target,57,57,0.6995070603908635,ai_applications,False,13,24,20,noun
+tactics,56,56,0.7144022527978164,ai_applications,False,15,31,10,noun

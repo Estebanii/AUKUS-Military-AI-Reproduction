@@ -1,0 +1,1558 @@
+{
+  "analysis_type": "nearest_neighbor_words_improved",
+  "description": "H3语义近邻分析（改进版）：按AUKUS前后分期 + BPE子词过滤 + 大小写去重",
+  "llm_model": "GPT-2",
+  "vocab_size": 50257,
+  "embedding_dim": 768,
+  "seed": 42,
+  "vocabulary_filter": {
+    "method": "Keep only Ġ-prefixed (word-initial) tokens, strip prefix, alpha-only, length>1, lowercase dedup by max similarity",
+    "total_vocab": 50257,
+    "special_tokens_removed": 1,
+    "non_G_prefix_removed": 17121,
+    "non_alpha_removed": 994,
+    "single_char_removed": 71,
+    "effective_tokens_kept": 32070
+  },
+  "sample_sizes": {
+    "total": {
+      "US": 20360,
+      "UK": 11224,
+      "AU": 6282
+    },
+    "pre_aukus": {
+      "US": 13232,
+      "UK": 6708,
+      "AU": 844
+    },
+    "post_aukus": {
+      "US": 7128,
+      "UK": 4516,
+      "AU": 5438
+    }
+  },
+  "post_aukus_analysis": {
+    "description": "Primary analysis: nearest neighbors using post-AUKUS country mean vectors",
+    "nearest_words": {
+      "US": [
+        {
+          "word": "engineering",
+          "similarity": 0.337718,
+          "original_form": "engineering"
+        },
+        {
+          "word": "space",
+          "similarity": 0.280337,
+          "original_form": "SPACE"
+        },
+        {
+          "word": "optimization",
+          "similarity": 0.279014,
+          "original_form": "optimization"
+        },
+        {
+          "word": "analytics",
+          "similarity": 0.271554,
+          "original_form": "analytics"
+        },
+        {
+          "word": "experimentation",
+          "similarity": 0.259808,
+          "original_form": "experimentation"
+        },
+        {
+          "word": "aerospace",
+          "similarity": 0.258458,
+          "original_form": "aerospace"
+        },
+        {
+          "word": "debugging",
+          "similarity": 0.253442,
+          "original_form": "debugging"
+        },
+        {
+          "word": "technical",
+          "similarity": 0.252417,
+          "original_form": "Technical"
+        },
+        {
+          "word": "testing",
+          "similarity": 0.252355,
+          "original_form": "testing"
+        },
+        {
+          "word": "science",
+          "similarity": 0.250332,
+          "original_form": "science"
+        },
+        {
+          "word": "technology",
+          "similarity": 0.247471,
+          "original_form": "technology"
+        },
+        {
+          "word": "equipment",
+          "similarity": 0.247347,
+          "original_form": "equipment"
+        },
+        {
+          "word": "customization",
+          "similarity": 0.243704,
+          "original_form": "customization"
+        },
+        {
+          "word": "engineers",
+          "similarity": 0.24304,
+          "original_form": "engineers"
+        },
+        {
+          "word": "labs",
+          "similarity": 0.24204,
+          "original_form": "labs"
+        },
+        {
+          "word": "research",
+          "similarity": 0.239994,
+          "original_form": "research"
+        },
+        {
+          "word": "technological",
+          "similarity": 0.23727,
+          "original_form": "technological"
+        },
+        {
+          "word": "enhancement",
+          "similarity": 0.23717,
+          "original_form": "enhancement"
+        },
+        {
+          "word": "proficiency",
+          "similarity": 0.236937,
+          "original_form": "proficiency"
+        },
+        {
+          "word": "installation",
+          "similarity": 0.23666,
+          "original_form": "Installation"
+        },
+        {
+          "word": "engineer",
+          "similarity": 0.236433,
+          "original_form": "engineer"
+        },
+        {
+          "word": "imaging",
+          "similarity": 0.235348,
+          "original_form": "imaging"
+        },
+        {
+          "word": "information",
+          "similarity": 0.234981,
+          "original_form": "INFORMATION"
+        },
+        {
+          "word": "maintenance",
+          "similarity": 0.234398,
+          "original_form": "maintenance"
+        },
+        {
+          "word": "cybersecurity",
+          "similarity": 0.233592,
+          "original_form": "cybersecurity"
+        },
+        {
+          "word": "upgrading",
+          "similarity": 0.233267,
+          "original_form": "upgrading"
+        },
+        {
+          "word": "acquisition",
+          "similarity": 0.233073,
+          "original_form": "Acquisition"
+        },
+        {
+          "word": "simulation",
+          "similarity": 0.232803,
+          "original_form": "Simulation"
+        },
+        {
+          "word": "mathematics",
+          "similarity": 0.232265,
+          "original_form": "mathematics"
+        },
+        {
+          "word": "expertise",
+          "similarity": 0.232089,
+          "original_form": "expertise"
+        }
+      ],
+      "UK": [
+        {
+          "word": "engineering",
+          "similarity": 0.318739,
+          "original_form": "engineering"
+        },
+        {
+          "word": "space",
+          "similarity": 0.26962,
+          "original_form": "space"
+        },
+        {
+          "word": "equipment",
+          "similarity": 0.267385,
+          "original_form": "equipment"
+        },
+        {
+          "word": "technology",
+          "similarity": 0.242783,
+          "original_form": "technology"
+        },
+        {
+          "word": "research",
+          "similarity": 0.241534,
+          "original_form": "research"
+        },
+        {
+          "word": "experimentation",
+          "similarity": 0.239455,
+          "original_form": "experimentation"
+        },
+        {
+          "word": "analytics",
+          "similarity": 0.238441,
+          "original_form": "analytics"
+        },
+        {
+          "word": "optimization",
+          "similarity": 0.23033,
+          "original_form": "optimization"
+        },
+        {
+          "word": "expertise",
+          "similarity": 0.228541,
+          "original_form": "expertise"
+        },
+        {
+          "word": "aerospace",
+          "similarity": 0.228454,
+          "original_form": "aerospace"
+        },
+        {
+          "word": "technologies",
+          "similarity": 0.218479,
+          "original_form": "technologies"
+        },
+        {
+          "word": "testing",
+          "similarity": 0.217008,
+          "original_form": "testing"
+        },
+        {
+          "word": "engineers",
+          "similarity": 0.216883,
+          "original_form": "engineers"
+        },
+        {
+          "word": "training",
+          "similarity": 0.215571,
+          "original_form": "training"
+        },
+        {
+          "word": "technological",
+          "similarity": 0.215427,
+          "original_form": "technological"
+        },
+        {
+          "word": "automation",
+          "similarity": 0.213582,
+          "original_form": "automation"
+        },
+        {
+          "word": "engineer",
+          "similarity": 0.212433,
+          "original_form": "engineer"
+        },
+        {
+          "word": "mobility",
+          "similarity": 0.21069,
+          "original_form": "mobility"
+        },
+        {
+          "word": "science",
+          "similarity": 0.209992,
+          "original_form": "science"
+        },
+        {
+          "word": "experiments",
+          "similarity": 0.208933,
+          "original_form": "experiments"
+        },
+        {
+          "word": "infrastructure",
+          "similarity": 0.207486,
+          "original_form": "infrastructure"
+        },
+        {
+          "word": "analysis",
+          "similarity": 0.207242,
+          "original_form": "Analysis"
+        },
+        {
+          "word": "installation",
+          "similarity": 0.206055,
+          "original_form": "Installation"
+        },
+        {
+          "word": "knowledge",
+          "similarity": 0.205271,
+          "original_form": "Knowledge"
+        },
+        {
+          "word": "physics",
+          "similarity": 0.204248,
+          "original_form": "physics"
+        },
+        {
+          "word": "operations",
+          "similarity": 0.203838,
+          "original_form": "Operations"
+        },
+        {
+          "word": "information",
+          "similarity": 0.203389,
+          "original_form": "Information"
+        },
+        {
+          "word": "capabilities",
+          "similarity": 0.203213,
+          "original_form": "capabilities"
+        },
+        {
+          "word": "innovation",
+          "similarity": 0.201026,
+          "original_form": "innovation"
+        },
+        {
+          "word": "labs",
+          "similarity": 0.199648,
+          "original_form": "labs"
+        }
+      ],
+      "AU": [
+        {
+          "word": "engineering",
+          "similarity": 0.337414,
+          "original_form": "engineering"
+        },
+        {
+          "word": "training",
+          "similarity": 0.275505,
+          "original_form": "training"
+        },
+        {
+          "word": "equipment",
+          "similarity": 0.2672,
+          "original_form": "equipment"
+        },
+        {
+          "word": "testing",
+          "similarity": 0.261156,
+          "original_form": "testing"
+        },
+        {
+          "word": "experimentation",
+          "similarity": 0.247318,
+          "original_form": "experimentation"
+        },
+        {
+          "word": "maintenance",
+          "similarity": 0.242403,
+          "original_form": "maintenance"
+        },
+        {
+          "word": "research",
+          "similarity": 0.241679,
+          "original_form": "research"
+        },
+        {
+          "word": "technology",
+          "similarity": 0.232403,
+          "original_form": "technology"
+        },
+        {
+          "word": "optimization",
+          "similarity": 0.231635,
+          "original_form": "optimization"
+        },
+        {
+          "word": "analytics",
+          "similarity": 0.230475,
+          "original_form": "analytics"
+        },
+        {
+          "word": "engineer",
+          "similarity": 0.22219,
+          "original_form": "engineer"
+        },
+        {
+          "word": "downtime",
+          "similarity": 0.211988,
+          "original_form": "downtime"
+        },
+        {
+          "word": "acquisition",
+          "similarity": 0.210766,
+          "original_form": "Acquisition"
+        },
+        {
+          "word": "engineers",
+          "similarity": 0.209693,
+          "original_form": "engineers"
+        },
+        {
+          "word": "experiments",
+          "similarity": 0.209365,
+          "original_form": "experiments"
+        },
+        {
+          "word": "debugging",
+          "similarity": 0.208142,
+          "original_form": "debugging"
+        },
+        {
+          "word": "science",
+          "similarity": 0.207977,
+          "original_form": "science"
+        },
+        {
+          "word": "enhancement",
+          "similarity": 0.20708,
+          "original_form": "enhancement"
+        },
+        {
+          "word": "expertise",
+          "similarity": 0.206898,
+          "original_form": "expertise"
+        },
+        {
+          "word": "operations",
+          "similarity": 0.205771,
+          "original_form": "Operations"
+        },
+        {
+          "word": "technical",
+          "similarity": 0.205482,
+          "original_form": "Technical"
+        },
+        {
+          "word": "analysis",
+          "similarity": 0.205324,
+          "original_form": "Analysis"
+        },
+        {
+          "word": "imaging",
+          "similarity": 0.205158,
+          "original_form": "imaging"
+        },
+        {
+          "word": "reconnaissance",
+          "similarity": 0.204792,
+          "original_form": "reconnaissance"
+        },
+        {
+          "word": "automation",
+          "similarity": 0.203927,
+          "original_form": "automation"
+        },
+        {
+          "word": "experimenting",
+          "similarity": 0.20222,
+          "original_form": "experimenting"
+        },
+        {
+          "word": "space",
+          "similarity": 0.201615,
+          "original_form": "space"
+        },
+        {
+          "word": "innovation",
+          "similarity": 0.200813,
+          "original_form": "innovation"
+        },
+        {
+          "word": "labs",
+          "similarity": 0.20057,
+          "original_form": "labs"
+        },
+        {
+          "word": "infrastructure",
+          "similarity": 0.199923,
+          "original_form": "infrastructure"
+        }
+      ]
+    },
+    "common_words_top15": [
+      "analytics",
+      "engineering",
+      "engineers",
+      "equipment",
+      "experimentation",
+      "optimization",
+      "technology",
+      "testing"
+    ],
+    "unique_words_top15": {
+      "US": [
+        "customization",
+        "debugging",
+        "labs",
+        "science",
+        "technical"
+      ],
+      "UK": [
+        "expertise",
+        "technological",
+        "technologies"
+      ],
+      "AU": [
+        "acquisition",
+        "downtime",
+        "engineer",
+        "experiments",
+        "maintenance"
+      ]
+    }
+  },
+  "pre_aukus_analysis": {
+    "description": "Comparison: nearest neighbors using pre-AUKUS country mean vectors",
+    "nearest_words": {
+      "US": [
+        {
+          "word": "engineering",
+          "similarity": 0.328604,
+          "original_form": "engineering"
+        },
+        {
+          "word": "optimization",
+          "similarity": 0.275922,
+          "original_form": "optimization"
+        },
+        {
+          "word": "testing",
+          "similarity": 0.271815,
+          "original_form": "testing"
+        },
+        {
+          "word": "analytics",
+          "similarity": 0.257773,
+          "original_form": "analytics"
+        },
+        {
+          "word": "experimentation",
+          "similarity": 0.256347,
+          "original_form": "experimentation"
+        },
+        {
+          "word": "debugging",
+          "similarity": 0.251379,
+          "original_form": "debugging"
+        },
+        {
+          "word": "space",
+          "similarity": 0.243459,
+          "original_form": "SPACE"
+        },
+        {
+          "word": "customization",
+          "similarity": 0.242923,
+          "original_form": "customization"
+        },
+        {
+          "word": "labs",
+          "similarity": 0.239993,
+          "original_form": "labs"
+        },
+        {
+          "word": "equipment",
+          "similarity": 0.239601,
+          "original_form": "equipment"
+        },
+        {
+          "word": "maintenance",
+          "similarity": 0.237399,
+          "original_form": "maintenance"
+        },
+        {
+          "word": "training",
+          "similarity": 0.236519,
+          "original_form": "Training"
+        },
+        {
+          "word": "science",
+          "similarity": 0.236247,
+          "original_form": "science"
+        },
+        {
+          "word": "technical",
+          "similarity": 0.235937,
+          "original_form": "Technical"
+        },
+        {
+          "word": "enhancement",
+          "similarity": 0.235027,
+          "original_form": "enhancement"
+        },
+        {
+          "word": "installation",
+          "similarity": 0.232141,
+          "original_form": "Installation"
+        },
+        {
+          "word": "engineer",
+          "similarity": 0.23173,
+          "original_form": "engineer"
+        },
+        {
+          "word": "proficiency",
+          "similarity": 0.230326,
+          "original_form": "proficiency"
+        },
+        {
+          "word": "engineers",
+          "similarity": 0.228322,
+          "original_form": "engineers"
+        },
+        {
+          "word": "imaging",
+          "similarity": 0.227712,
+          "original_form": "imaging"
+        },
+        {
+          "word": "technology",
+          "similarity": 0.227479,
+          "original_form": "technology"
+        },
+        {
+          "word": "upgrading",
+          "similarity": 0.227393,
+          "original_form": "upgrading"
+        },
+        {
+          "word": "configuration",
+          "similarity": 0.225883,
+          "original_form": "Configuration"
+        },
+        {
+          "word": "acquisition",
+          "similarity": 0.224161,
+          "original_form": "Acquisition"
+        },
+        {
+          "word": "automation",
+          "similarity": 0.223122,
+          "original_form": "automation"
+        },
+        {
+          "word": "research",
+          "similarity": 0.222881,
+          "original_form": "research"
+        },
+        {
+          "word": "usability",
+          "similarity": 0.222456,
+          "original_form": "usability"
+        },
+        {
+          "word": "experiments",
+          "similarity": 0.222272,
+          "original_form": "experiments"
+        },
+        {
+          "word": "simulation",
+          "similarity": 0.221824,
+          "original_form": "Simulation"
+        },
+        {
+          "word": "experimenting",
+          "similarity": 0.221358,
+          "original_form": "experimenting"
+        }
+      ],
+      "UK": [
+        {
+          "word": "engineering",
+          "similarity": 0.318082,
+          "original_form": "engineering"
+        },
+        {
+          "word": "optimization",
+          "similarity": 0.257398,
+          "original_form": "optimization"
+        },
+        {
+          "word": "experimentation",
+          "similarity": 0.250506,
+          "original_form": "experimentation"
+        },
+        {
+          "word": "equipment",
+          "similarity": 0.245082,
+          "original_form": "equipment"
+        },
+        {
+          "word": "testing",
+          "similarity": 0.240181,
+          "original_form": "testing"
+        },
+        {
+          "word": "space",
+          "similarity": 0.237754,
+          "original_form": "space"
+        },
+        {
+          "word": "maintenance",
+          "similarity": 0.235009,
+          "original_form": "maintenance"
+        },
+        {
+          "word": "technology",
+          "similarity": 0.233239,
+          "original_form": "technology"
+        },
+        {
+          "word": "analytics",
+          "similarity": 0.233101,
+          "original_form": "analytics"
+        },
+        {
+          "word": "debugging",
+          "similarity": 0.231522,
+          "original_form": "debugging"
+        },
+        {
+          "word": "downtime",
+          "similarity": 0.228317,
+          "original_form": "downtime"
+        },
+        {
+          "word": "research",
+          "similarity": 0.227225,
+          "original_form": "research"
+        },
+        {
+          "word": "acquisition",
+          "similarity": 0.226834,
+          "original_form": "Acquisition"
+        },
+        {
+          "word": "training",
+          "similarity": 0.224216,
+          "original_form": "Training"
+        },
+        {
+          "word": "expertise",
+          "similarity": 0.222445,
+          "original_form": "expertise"
+        },
+        {
+          "word": "mobility",
+          "similarity": 0.219836,
+          "original_form": "mobility"
+        },
+        {
+          "word": "automation",
+          "similarity": 0.218934,
+          "original_form": "automation"
+        },
+        {
+          "word": "upgrading",
+          "similarity": 0.216002,
+          "original_form": "upgrading"
+        },
+        {
+          "word": "engineer",
+          "similarity": 0.214965,
+          "original_form": "engineer"
+        },
+        {
+          "word": "imaging",
+          "similarity": 0.214574,
+          "original_form": "imaging"
+        },
+        {
+          "word": "storage",
+          "similarity": 0.214062,
+          "original_form": "storage"
+        },
+        {
+          "word": "enhancement",
+          "similarity": 0.213468,
+          "original_form": "enhancement"
+        },
+        {
+          "word": "installation",
+          "similarity": 0.212562,
+          "original_form": "Installation"
+        },
+        {
+          "word": "analysis",
+          "similarity": 0.21195,
+          "original_form": "Analysis"
+        },
+        {
+          "word": "upgrade",
+          "similarity": 0.211621,
+          "original_form": "Upgrade"
+        },
+        {
+          "word": "knowledge",
+          "similarity": 0.210537,
+          "original_form": "Knowledge"
+        },
+        {
+          "word": "configuration",
+          "similarity": 0.210165,
+          "original_form": "Configuration"
+        },
+        {
+          "word": "customization",
+          "similarity": 0.208165,
+          "original_form": "customization"
+        },
+        {
+          "word": "calibration",
+          "similarity": 0.207482,
+          "original_form": "calibration"
+        },
+        {
+          "word": "innovation",
+          "similarity": 0.207343,
+          "original_form": "innovation"
+        }
+      ],
+      "AU": [
+        {
+          "word": "engineering",
+          "similarity": 0.3363,
+          "original_form": "engineering"
+        },
+        {
+          "word": "training",
+          "similarity": 0.260134,
+          "original_form": "training"
+        },
+        {
+          "word": "equipment",
+          "similarity": 0.258785,
+          "original_form": "equipment"
+        },
+        {
+          "word": "testing",
+          "similarity": 0.257181,
+          "original_form": "testing"
+        },
+        {
+          "word": "maintenance",
+          "similarity": 0.248285,
+          "original_form": "maintenance"
+        },
+        {
+          "word": "optimization",
+          "similarity": 0.24439,
+          "original_form": "optimization"
+        },
+        {
+          "word": "experimentation",
+          "similarity": 0.243897,
+          "original_form": "experimentation"
+        },
+        {
+          "word": "analytics",
+          "similarity": 0.238758,
+          "original_form": "analytics"
+        },
+        {
+          "word": "engineer",
+          "similarity": 0.228356,
+          "original_form": "engineer"
+        },
+        {
+          "word": "acquisition",
+          "similarity": 0.225742,
+          "original_form": "Acquisition"
+        },
+        {
+          "word": "debugging",
+          "similarity": 0.224684,
+          "original_form": "debugging"
+        },
+        {
+          "word": "technology",
+          "similarity": 0.220941,
+          "original_form": "technology"
+        },
+        {
+          "word": "downtime",
+          "similarity": 0.219434,
+          "original_form": "downtime"
+        },
+        {
+          "word": "space",
+          "similarity": 0.215316,
+          "original_form": "space"
+        },
+        {
+          "word": "reconnaissance",
+          "similarity": 0.21281,
+          "original_form": "reconnaissance"
+        },
+        {
+          "word": "research",
+          "similarity": 0.212256,
+          "original_form": "research"
+        },
+        {
+          "word": "imaging",
+          "similarity": 0.212141,
+          "original_form": "imaging"
+        },
+        {
+          "word": "automation",
+          "similarity": 0.212115,
+          "original_form": "automation"
+        },
+        {
+          "word": "analysis",
+          "similarity": 0.211933,
+          "original_form": "Analysis"
+        },
+        {
+          "word": "engineers",
+          "similarity": 0.210861,
+          "original_form": "engineers"
+        },
+        {
+          "word": "enhancement",
+          "similarity": 0.210077,
+          "original_form": "enhancement"
+        },
+        {
+          "word": "operations",
+          "similarity": 0.209408,
+          "original_form": "Operations"
+        },
+        {
+          "word": "installation",
+          "similarity": 0.205318,
+          "original_form": "Installation"
+        },
+        {
+          "word": "upgrading",
+          "similarity": 0.204796,
+          "original_form": "upgrading"
+        },
+        {
+          "word": "calibration",
+          "similarity": 0.204792,
+          "original_form": "calibration"
+        },
+        {
+          "word": "expertise",
+          "similarity": 0.204692,
+          "original_form": "expertise"
+        },
+        {
+          "word": "inventory",
+          "similarity": 0.204245,
+          "original_form": "Inventory"
+        },
+        {
+          "word": "experimenting",
+          "similarity": 0.203904,
+          "original_form": "experimenting"
+        },
+        {
+          "word": "technician",
+          "similarity": 0.203688,
+          "original_form": "technician"
+        },
+        {
+          "word": "simulator",
+          "similarity": 0.203598,
+          "original_form": "simulator"
+        }
+      ]
+    },
+    "common_words_top15": [
+      "analytics",
+      "debugging",
+      "engineering",
+      "equipment",
+      "experimentation",
+      "maintenance",
+      "optimization",
+      "space",
+      "testing",
+      "training"
+    ],
+    "unique_words_top15": {
+      "US": [
+        "customization",
+        "enhancement",
+        "labs",
+        "science",
+        "technical"
+      ],
+      "UK": [
+        "expertise",
+        "research"
+      ],
+      "AU": [
+        "engineer",
+        "reconnaissance"
+      ]
+    }
+  },
+  "full_period_analysis": {
+    "description": "Full-period analysis (all time periods) for backward compatibility",
+    "nearest_words": {
+      "US": [
+        {
+          "word": "engineering",
+          "similarity": 0.333159,
+          "original_form": "engineering"
+        },
+        {
+          "word": "optimization",
+          "similarity": 0.278054,
+          "original_form": "optimization"
+        },
+        {
+          "word": "testing",
+          "similarity": 0.26556,
+          "original_form": "testing"
+        },
+        {
+          "word": "analytics",
+          "similarity": 0.263809,
+          "original_form": "analytics"
+        },
+        {
+          "word": "experimentation",
+          "similarity": 0.258546,
+          "original_form": "experimentation"
+        },
+        {
+          "word": "space",
+          "similarity": 0.258018,
+          "original_form": "SPACE"
+        },
+        {
+          "word": "debugging",
+          "similarity": 0.253041,
+          "original_form": "debugging"
+        },
+        {
+          "word": "customization",
+          "similarity": 0.244079,
+          "original_form": "customization"
+        },
+        {
+          "word": "equipment",
+          "similarity": 0.243331,
+          "original_form": "equipment"
+        },
+        {
+          "word": "technical",
+          "similarity": 0.242896,
+          "original_form": "Technical"
+        },
+        {
+          "word": "science",
+          "similarity": 0.242319,
+          "original_form": "science"
+        },
+        {
+          "word": "labs",
+          "similarity": 0.241609,
+          "original_form": "labs"
+        },
+        {
+          "word": "maintenance",
+          "similarity": 0.237131,
+          "original_form": "maintenance"
+        },
+        {
+          "word": "enhancement",
+          "similarity": 0.236661,
+          "original_form": "enhancement"
+        },
+        {
+          "word": "technology",
+          "similarity": 0.235712,
+          "original_form": "technology"
+        },
+        {
+          "word": "aerospace",
+          "similarity": 0.235184,
+          "original_form": "aerospace"
+        },
+        {
+          "word": "installation",
+          "similarity": 0.234647,
+          "original_form": "Installation"
+        },
+        {
+          "word": "engineers",
+          "similarity": 0.2346,
+          "original_form": "engineers"
+        },
+        {
+          "word": "training",
+          "similarity": 0.234334,
+          "original_form": "Training"
+        },
+        {
+          "word": "engineer",
+          "similarity": 0.234303,
+          "original_form": "engineer"
+        },
+        {
+          "word": "proficiency",
+          "similarity": 0.233602,
+          "original_form": "proficiency"
+        },
+        {
+          "word": "imaging",
+          "similarity": 0.231359,
+          "original_form": "imaging"
+        },
+        {
+          "word": "upgrading",
+          "similarity": 0.230384,
+          "original_form": "upgrading"
+        },
+        {
+          "word": "research",
+          "similarity": 0.230029,
+          "original_form": "research"
+        },
+        {
+          "word": "acquisition",
+          "similarity": 0.228269,
+          "original_form": "Acquisition"
+        },
+        {
+          "word": "simulation",
+          "similarity": 0.226691,
+          "original_form": "Simulation"
+        },
+        {
+          "word": "usability",
+          "similarity": 0.226415,
+          "original_form": "usability"
+        },
+        {
+          "word": "automation",
+          "similarity": 0.226243,
+          "original_form": "automation"
+        },
+        {
+          "word": "configuration",
+          "similarity": 0.225046,
+          "original_form": "Configuration"
+        },
+        {
+          "word": "experiments",
+          "similarity": 0.223724,
+          "original_form": "experiments"
+        }
+      ],
+      "UK": [
+        {
+          "word": "engineering",
+          "similarity": 0.322076,
+          "original_form": "engineering"
+        },
+        {
+          "word": "equipment",
+          "similarity": 0.257343,
+          "original_form": "equipment"
+        },
+        {
+          "word": "space",
+          "similarity": 0.253958,
+          "original_form": "space"
+        },
+        {
+          "word": "optimization",
+          "similarity": 0.249001,
+          "original_form": "optimization"
+        },
+        {
+          "word": "experimentation",
+          "similarity": 0.248777,
+          "original_form": "experimentation"
+        },
+        {
+          "word": "technology",
+          "similarity": 0.239986,
+          "original_form": "technology"
+        },
+        {
+          "word": "analytics",
+          "similarity": 0.238075,
+          "original_form": "analytics"
+        },
+        {
+          "word": "research",
+          "similarity": 0.235909,
+          "original_form": "research"
+        },
+        {
+          "word": "testing",
+          "similarity": 0.233224,
+          "original_form": "testing"
+        },
+        {
+          "word": "expertise",
+          "similarity": 0.227613,
+          "original_form": "expertise"
+        },
+        {
+          "word": "training",
+          "similarity": 0.223112,
+          "original_form": "Training"
+        },
+        {
+          "word": "debugging",
+          "similarity": 0.219931,
+          "original_form": "debugging"
+        },
+        {
+          "word": "automation",
+          "similarity": 0.219238,
+          "original_form": "automation"
+        },
+        {
+          "word": "mobility",
+          "similarity": 0.218552,
+          "original_form": "mobility"
+        },
+        {
+          "word": "maintenance",
+          "similarity": 0.217642,
+          "original_form": "maintenance"
+        },
+        {
+          "word": "acquisition",
+          "similarity": 0.217417,
+          "original_form": "Acquisition"
+        },
+        {
+          "word": "downtime",
+          "similarity": 0.216585,
+          "original_form": "downtime"
+        },
+        {
+          "word": "engineer",
+          "similarity": 0.21641,
+          "original_form": "engineer"
+        },
+        {
+          "word": "aerospace",
+          "similarity": 0.212832,
+          "original_form": "aerospace"
+        },
+        {
+          "word": "analysis",
+          "similarity": 0.212443,
+          "original_form": "Analysis"
+        },
+        {
+          "word": "installation",
+          "similarity": 0.212304,
+          "original_form": "Installation"
+        },
+        {
+          "word": "engineers",
+          "similarity": 0.210926,
+          "original_form": "engineers"
+        },
+        {
+          "word": "knowledge",
+          "similarity": 0.210779,
+          "original_form": "Knowledge"
+        },
+        {
+          "word": "science",
+          "similarity": 0.210179,
+          "original_form": "science"
+        },
+        {
+          "word": "imaging",
+          "similarity": 0.210062,
+          "original_form": "imaging"
+        },
+        {
+          "word": "technologies",
+          "similarity": 0.208332,
+          "original_form": "technologies"
+        },
+        {
+          "word": "enhancement",
+          "similarity": 0.208129,
+          "original_form": "enhancement"
+        },
+        {
+          "word": "storage",
+          "similarity": 0.207864,
+          "original_form": "storage"
+        },
+        {
+          "word": "technological",
+          "similarity": 0.207405,
+          "original_form": "technological"
+        },
+        {
+          "word": "innovation",
+          "similarity": 0.207105,
+          "original_form": "innovation"
+        }
+      ],
+      "AU": [
+        {
+          "word": "engineering",
+          "similarity": 0.33779,
+          "original_form": "engineering"
+        },
+        {
+          "word": "training",
+          "similarity": 0.273899,
+          "original_form": "training"
+        },
+        {
+          "word": "equipment",
+          "similarity": 0.266501,
+          "original_form": "equipment"
+        },
+        {
+          "word": "testing",
+          "similarity": 0.261035,
+          "original_form": "testing"
+        },
+        {
+          "word": "experimentation",
+          "similarity": 0.247249,
+          "original_form": "experimentation"
+        },
+        {
+          "word": "maintenance",
+          "similarity": 0.243556,
+          "original_form": "maintenance"
+        },
+        {
+          "word": "research",
+          "similarity": 0.238162,
+          "original_form": "research"
+        },
+        {
+          "word": "optimization",
+          "similarity": 0.233681,
+          "original_form": "optimization"
+        },
+        {
+          "word": "analytics",
+          "similarity": 0.231927,
+          "original_form": "analytics"
+        },
+        {
+          "word": "technology",
+          "similarity": 0.231247,
+          "original_form": "technology"
+        },
+        {
+          "word": "engineer",
+          "similarity": 0.223349,
+          "original_form": "engineer"
+        },
+        {
+          "word": "downtime",
+          "similarity": 0.213301,
+          "original_form": "downtime"
+        },
+        {
+          "word": "acquisition",
+          "similarity": 0.213074,
+          "original_form": "Acquisition"
+        },
+        {
+          "word": "debugging",
+          "similarity": 0.210652,
+          "original_form": "debugging"
+        },
+        {
+          "word": "engineers",
+          "similarity": 0.210173,
+          "original_form": "engineers"
+        },
+        {
+          "word": "experiments",
+          "similarity": 0.208796,
+          "original_form": "experiments"
+        },
+        {
+          "word": "enhancement",
+          "similarity": 0.207798,
+          "original_form": "enhancement"
+        },
+        {
+          "word": "expertise",
+          "similarity": 0.206927,
+          "original_form": "expertise"
+        },
+        {
+          "word": "science",
+          "similarity": 0.206793,
+          "original_form": "science"
+        },
+        {
+          "word": "operations",
+          "similarity": 0.206571,
+          "original_form": "Operations"
+        },
+        {
+          "word": "analysis",
+          "similarity": 0.206516,
+          "original_form": "Analysis"
+        },
+        {
+          "word": "imaging",
+          "similarity": 0.206399,
+          "original_form": "imaging"
+        },
+        {
+          "word": "reconnaissance",
+          "similarity": 0.20617,
+          "original_form": "reconnaissance"
+        },
+        {
+          "word": "automation",
+          "similarity": 0.205326,
+          "original_form": "automation"
+        },
+        {
+          "word": "technical",
+          "similarity": 0.20516,
+          "original_form": "Technical"
+        },
+        {
+          "word": "space",
+          "similarity": 0.203739,
+          "original_form": "space"
+        },
+        {
+          "word": "experimenting",
+          "similarity": 0.202756,
+          "original_form": "experimenting"
+        },
+        {
+          "word": "labs",
+          "similarity": 0.200869,
+          "original_form": "labs"
+        },
+        {
+          "word": "programming",
+          "similarity": 0.200294,
+          "original_form": "programming"
+        },
+        {
+          "word": "innovation",
+          "similarity": 0.200121,
+          "original_form": "innovation"
+        }
+      ]
+    },
+    "common_words_top15": [
+      "analytics",
+      "debugging",
+      "engineering",
+      "equipment",
+      "experimentation",
+      "maintenance",
+      "optimization",
+      "technology",
+      "testing"
+    ],
+    "unique_words_top15": {
+      "US": [
+        "customization",
+        "enhancement",
+        "labs",
+        "science",
+        "technical"
+      ],
+      "UK": [
+        "automation",
+        "expertise",
+        "mobility"
+      ],
+      "AU": [
+        "acquisition",
+        "downtime",
+        "engineer",
+        "engineers"
+      ]
+    }
+  },
+  "pre_post_comparison": {
+    "description": "Words that changed in/out of top-15 between pre and post AUKUS",
+    "US": {
+      "entered": [
+        "aerospace",
+        "engineers",
+        "technology"
+      ],
+      "exited": [
+        "enhancement",
+        "maintenance",
+        "training"
+      ]
+    },
+    "UK": {
+      "entered": [
+        "aerospace",
+        "engineers",
+        "technological",
+        "technologies"
+      ],
+      "exited": [
+        "acquisition",
+        "debugging",
+        "downtime",
+        "maintenance"
+      ]
+    },
+    "AU": {
+      "entered": [
+        "engineers",
+        "experiments",
+        "research"
+      ],
+      "exited": [
+        "debugging",
+        "reconnaissance",
+        "space"
+      ]
+    }
+  },
+  "methodology_notes": [
+    "Country mean vectors computed separately for each time period (pre-AUKUS, post-AUKUS, full)",
+    "Vocabulary filtered to Ġ-prefixed (word-initial) GPT-2 tokens only, eliminating BPE subword fragments",
+    "Only purely alphabetic tokens with length > 1 retained",
+    "Case-folded to lowercase, keeping highest-similarity variant per word for deduplication",
+    "Cosine similarity computed between country mean Y_vector_global and GPT-2 wte embeddings",
+    "Top-30 nearest words reported per country per period; common/unique analysis uses top-15"
+  ],
+  "timestamp": "2026-04-01T03:51:51.988612"
+}

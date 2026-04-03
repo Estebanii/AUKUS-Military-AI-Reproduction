@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+.DS_Store
+.mpl_cache/
+
+# Large data files (distributed via GitHub Release)
+data/semantic_vectors_paragraph_global_A.parquet
+data/raw/us.csv
+data/raw/uk.csv
+data/raw/au.csv
+data/intermediate/anchor_occurrences_all.parquet
+data/intermediate/term_occurrences.parquet
+outputs/modal_reproduction/U_anchors.npy
+outputs/modal_reproduction/U_target.npy
+outputs/modal_reproduction/Y_matrix_paragraph_global.npy
+outputs/modal_reproduction/semantic_vectors_paragraph_global_A.parquet

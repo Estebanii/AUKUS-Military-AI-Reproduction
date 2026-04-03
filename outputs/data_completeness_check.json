@@ -1,0 +1,1429 @@
+{
+  "US": {
+    "data_range": {
+      "year_min": 2014,
+      "year_max": 2025,
+      "n_obs": 20360,
+      "n_months": 144
+    },
+    "test_1_distribution": {
+      "mean": 141.38888888888889,
+      "variance": 3744.1554001554005,
+      "dispersion_ratio": 26.48125626828967,
+      "overdispersed": true,
+      "poisson_chi2": 8.634711562850163e+60,
+      "poisson_p": 0.0,
+      "poisson_rejected": true,
+      "nb_fit_possible": true,
+      "nb_r": 5.548740901948437,
+      "nb_p": 0.037762558915962884,
+      "interpretation": "Negative Binomial更适合（过度离散）"
+    },
+    "test_2_outlier_detection": {
+      "iqr_bounds": {
+        "lower": -0.875,
+        "upper": 284.125
+      },
+      "n_z_outliers": 1,
+      "z_outliers": [
+        {
+          "year": 2018,
+          "month": 4,
+          "count": 298,
+          "z_score": 2.5683775505980115
+        }
+      ],
+      "n_zero_months": 7,
+      "zero_months": [
+        {
+          "year": 2014,
+          "month": 1
+        },
+        {
+          "year": 2014,
+          "month": 2
+        },
+        {
+          "year": 2014,
+          "month": 3
+        },
+        {
+          "year": 2014,
+          "month": 4
+        },
+        {
+          "year": 2014,
+          "month": 5
+        },
+        {
+          "year": 2014,
+          "month": 6
+        },
+        {
+          "year": 2025,
+          "month": 12
+        }
+      ],
+      "n_low_months": 1,
+      "low_months": [
+        {
+          "year": 2025,
+          "month": 10,
+          "count": 3
+        }
+      ],
+      "zero_rate": 0.04861111111111111
+    },
+    "test_3_structural_breaks": {
+      "n_candidate_splits": 96,
+      "n_significant_breaks": 0,
+      "top_breaks": [],
+      "interpretation": "无显著结构性断裂"
+    },
+    "test_4_zero_inflation": {
+      "n_zeros": 7,
+      "n_total": 144,
+      "observed_zero_rate": 0.04861111111111111,
+      "expected_zero_rate_poisson": 3.940812328251742e-62,
+      "zero_excess_ratio": 1.2335302232643087e+60,
+      "vuong_z": 2.938487972214649e+30,
+      "zero_inflated": true,
+      "consecutive_zero_gaps": [
+        {
+          "start": "2014-01",
+          "end": "2014-06",
+          "length": 6
+        }
+      ],
+      "max_gap_months": 6
+    },
+    "test_5_yearly_uniformity": {
+      "yearly_results": [
+        {
+          "year": 2014,
+          "n_months_with_data": 6,
+          "total_obs": 867,
+          "chi2": 44.397923875432525,
+          "p_value": 1.9229960783365697e-08,
+          "uniform": false,
+          "cv": 0.22629334514522428,
+          "note": null
+        },
+        {
+          "year": 2015,
+          "n_months_with_data": 12,
+          "total_obs": 1933,
+          "chi2": 294.1391619244697,
+          "p_value": 1.502760663268553e-56,
+          "uniform": false,
+          "cv": 0.3900861206758802,
+          "note": null
+        },
+        {
+          "year": 2016,
+          "n_months_with_data": 12,
+          "total_obs": 2146,
+          "chi2": 72.32246039142589,
+          "p_value": 4.410734740705142e-11,
+          "uniform": false,
+          "cv": 0.18357846634201275,
+          "note": null
+        },
+        {
+          "year": 2017,
+          "n_months_with_data": 12,
+          "total_obs": 2199,
+          "chi2": 135.85948158253748,
+          "p_value": 1.1303126259069492e-23,
+          "uniform": false,
+          "cv": 0.24856064192873403,
+          "note": null
+        },
+        {
+          "year": 2018,
+          "n_months_with_data": 12,
+          "total_obs": 2030,
+          "chi2": 349.90147783251234,
+          "p_value": 2.543162781271655e-68,
+          "uniform": false,
+          "cv": 0.41516895357916145,
+          "note": null
+        },
+        {
+          "year": 2019,
+          "n_months_with_data": 12,
+          "total_obs": 1493,
+          "chi2": 136.75753516409912,
+          "p_value": 7.42794729717183e-24,
+          "uniform": false,
+          "cv": 0.30265351942868834,
+          "note": null
+        },
+        {
+          "year": 2020,
+          "n_months_with_data": 12,
+          "total_obs": 1597,
+          "chi2": 275.9693174702567,
+          "p_value": 9.970051792194744e-53,
+          "uniform": false,
+          "cv": 0.4156980063457246,
+          "note": null
+        },
+        {
+          "year": 2021,
+          "n_months_with_data": 12,
+          "total_obs": 1457,
+          "chi2": 113.25394646533974,
+          "p_value": 4.0948370007763923e-19,
+          "uniform": false,
+          "cv": 0.2788026493274849,
+          "note": null
+        },
+        {
+          "year": 2022,
+          "n_months_with_data": 12,
+          "total_obs": 1545,
+          "chi2": 158.3864077669903,
+          "p_value": 2.86505910402581e-28,
+          "uniform": false,
+          "cv": 0.32018037772924435,
+          "note": null
+        },
+        {
+          "year": 2023,
+          "n_months_with_data": 12,
+          "total_obs": 1598,
+          "chi2": 102.74092615769712,
+          "p_value": 5.109865932110979e-17,
+          "uniform": false,
+          "cv": 0.2535615224272607,
+          "note": null
+        },
+        {
+          "year": 2024,
+          "n_months_with_data": 12,
+          "total_obs": 2059,
+          "chi2": 86.0509956289461,
+          "p_value": 9.860665719175695e-14,
+          "uniform": false,
+          "cv": 0.2044324231933816,
+          "note": null
+        },
+        {
+          "year": 2025,
+          "n_months_with_data": 11,
+          "total_obs": 1436,
+          "chi2": 401.93454038997214,
+          "p_value": 3.647544107647536e-80,
+          "uniform": false,
+          "cv": 0.5290545387830488,
+          "note": null
+        }
+      ],
+      "n_years_tested": 12,
+      "n_uniform": 0,
+      "n_nonuniform": 12,
+      "uniformity_rate": 0.0
+    },
+    "test_6_yoy_growth": {
+      "yearly_counts": [
+        {
+          "year": 2014,
+          "count": 867,
+          "growth_rate": null
+        },
+        {
+          "year": 2015,
+          "count": 1933,
+          "growth_rate": 1.2295271049596308
+        },
+        {
+          "year": 2016,
+          "count": 2146,
+          "growth_rate": 0.11019141231246765
+        },
+        {
+          "year": 2017,
+          "count": 2199,
+          "growth_rate": 0.024697110904007502
+        },
+        {
+          "year": 2018,
+          "count": 2030,
+          "growth_rate": -0.07685311505229653
+        },
+        {
+          "year": 2019,
+          "count": 1493,
+          "growth_rate": -0.2645320197044335
+        },
+        {
+          "year": 2020,
+          "count": 1597,
+          "growth_rate": 0.06965840589417271
+        },
+        {
+          "year": 2021,
+          "count": 1457,
+          "growth_rate": -0.08766437069505317
+        },
+        {
+          "year": 2022,
+          "count": 1545,
+          "growth_rate": 0.06039807824296495
+        },
+        {
+          "year": 2023,
+          "count": 1598,
+          "growth_rate": 0.034304207119741026
+        },
+        {
+          "year": 2024,
+          "count": 2059,
+          "growth_rate": 0.2884856070087609
+        },
+        {
+          "year": 2025,
+          "count": 1436,
+          "growth_rate": -0.30257406508013596
+        }
+      ],
+      "mean_growth_rate": 0.0986943959918024,
+      "std_growth_rate": 0.41053175487383353,
+      "growth_anomalies": [
+        {
+          "year": 2015,
+          "count": 1933,
+          "growth_rate": 1.2295271049596308,
+          "z_score": 2.754556000948967
+        }
+      ],
+      "trend": {
+        "slope": 0.004753487149748361,
+        "r_squared": 0.004409119439572483,
+        "p_value": 0.8375476456158912,
+        "interpretation": "年均增长率约0.5%"
+      }
+    },
+    "test_7_seasonal_pattern": {
+      "valid_years": [
+        2014,
+        2015,
+        2016,
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "n_valid_years": 12,
+      "monthly_profile": [
+        {
+          "month": 1,
+          "mean": 93.5,
+          "std": 46.535421503898014
+        },
+        {
+          "month": 2,
+          "mean": 115.25,
+          "std": 52.28962177578401
+        },
+        {
+          "month": 3,
+          "mean": 169.33333333333334,
+          "std": 74.77521871137077
+        },
+        {
+          "month": 4,
+          "mean": 142.16666666666666,
+          "std": 80.40560058889308
+        },
+        {
+          "month": 5,
+          "mean": 145.66666666666666,
+          "std": 66.19988098497038
+        },
+        {
+          "month": 6,
+          "mean": 143.83333333333334,
+          "std": 59.8677836164954
+        },
+        {
+          "month": 7,
+          "mean": 144.08333333333334,
+          "std": 28.535331634925008
+        },
+        {
+          "month": 8,
+          "mean": 154.41666666666666,
+          "std": 54.66170062439984
+        },
+        {
+          "month": 9,
+          "mean": 207.58333333333334,
+          "std": 40.86442848189015
+        },
+        {
+          "month": 10,
+          "mean": 123.25,
+          "std": 56.56231479125881
+        },
+        {
+          "month": 11,
+          "mean": 120.66666666666667,
+          "std": 41.20532475152681
+        },
+        {
+          "month": 12,
+          "mean": 136.91666666666666,
+          "std": 58.59639817248052
+        }
+      ],
+      "kruskal_wallis_h": 33.396089647857934,
+      "kruskal_wallis_p": 0.00045375583076922394,
+      "seasonal_effect_significant": true,
+      "interpretation": "存在显著的月度季节性模式"
+    },
+    "test_8_runs_test": {
+      "n_runs": 49,
+      "expected_runs": 72.94444444444444,
+      "z_statistic": -4.0078822722121945,
+      "p_value": 6.12656452558813e-05,
+      "random": false,
+      "interpretation": "数据存在非随机聚集模式（可能提示系统性缺漏）"
+    }
+  },
+  "UK": {
+    "data_range": {
+      "year_min": 2004,
+      "year_max": 2025,
+      "n_obs": 11224,
+      "n_months": 264
+    },
+    "test_1_distribution": {
+      "mean": 42.515151515151516,
+      "variance": 2066.045396935131,
+      "dispersion_ratio": 48.59550826718412,
+      "overdispersed": true,
+      "poisson_chi2": 1.2073193437114728e+66,
+      "poisson_p": 0.0,
+      "poisson_rejected": true,
+      "nb_fit_possible": true,
+      "nb_r": 0.8932597436818344,
+      "nb_p": 0.02057803356025985,
+      "interpretation": "Negative Binomial更适合（过度离散）"
+    },
+    "test_2_outlier_detection": {
+      "iqr_bounds": {
+        "lower": -82.625,
+        "upper": 148.375
+      },
+      "n_z_outliers": 7,
+      "z_outliers": [
+        {
+          "year": 2015,
+          "month": 9,
+          "count": 163,
+          "z_score": 2.65574636089103
+        },
+        {
+          "year": 2017,
+          "month": 9,
+          "count": 164,
+          "z_score": 2.677788521331021
+        },
+        {
+          "year": 2021,
+          "month": 9,
+          "count": 175,
+          "z_score": 2.9202522861709217
+        },
+        {
+          "year": 2023,
+          "month": 6,
+          "count": 181,
+          "z_score": 3.0525052488108675
+        },
+        {
+          "year": 2024,
+          "month": 2,
+          "count": 245,
+          "z_score": 4.463203516970288
+        },
+        {
+          "year": 2025,
+          "month": 6,
+          "count": 221,
+          "z_score": 3.934191666410505
+        },
+        {
+          "year": 2025,
+          "month": 9,
+          "count": 323,
+          "z_score": 6.1824920312895815
+        }
+      ],
+      "n_zero_months": 35,
+      "zero_months": [
+        {
+          "year": 2004,
+          "month": 1
+        },
+        {
+          "year": 2004,
+          "month": 2
+        },
+        {
+          "year": 2004,
+          "month": 3
+        },
+        {
+          "year": 2004,
+          "month": 4
+        },
+        {
+          "year": 2004,
+          "month": 5
+        },
+        {
+          "year": 2004,
+          "month": 6
+        },
+        {
+          "year": 2004,
+          "month": 7
+        },
+        {
+          "year": 2004,
+          "month": 8
+        },
+        {
+          "year": 2004,
+          "month": 9
+        },
+        {
+          "year": 2004,
+          "month": 10
+        },
+        {
+          "year": 2004,
+          "month": 12
+        },
+        {
+          "year": 2005,
+          "month": 1
+        },
+        {
+          "year": 2005,
+          "month": 2
+        },
+        {
+          "year": 2005,
+          "month": 3
+        },
+        {
+          "year": 2005,
+          "month": 4
+        },
+        {
+          "year": 2005,
+          "month": 5
+        },
+        {
+          "year": 2005,
+          "month": 6
+        },
+        {
+          "year": 2005,
+          "month": 7
+        },
+        {
+          "year": 2005,
+          "month": 8
+        },
+        {
+          "year": 2005,
+          "month": 9
+        },
+        {
+          "year": 2005,
+          "month": 12
+        },
+        {
+          "year": 2006,
+          "month": 3
+        },
+        {
+          "year": 2006,
+          "month": 4
+        },
+        {
+          "year": 2006,
+          "month": 6
+        },
+        {
+          "year": 2006,
+          "month": 10
+        },
+        {
+          "year": 2006,
+          "month": 11
+        },
+        {
+          "year": 2007,
+          "month": 3
+        },
+        {
+          "year": 2007,
+          "month": 10
+        },
+        {
+          "year": 2008,
+          "month": 3
+        },
+        {
+          "year": 2008,
+          "month": 5
+        },
+        {
+          "year": 2008,
+          "month": 8
+        },
+        {
+          "year": 2009,
+          "month": 10
+        },
+        {
+          "year": 2018,
+          "month": 4
+        },
+        {
+          "year": 2018,
+          "month": 5
+        },
+        {
+          "year": 2025,
+          "month": 12
+        }
+      ],
+      "n_low_months": 34,
+      "low_months": [
+        {
+          "year": 2004,
+          "month": 11,
+          "count": 3
+        },
+        {
+          "year": 2005,
+          "month": 10,
+          "count": 1
+        },
+        {
+          "year": 2005,
+          "month": 11,
+          "count": 1
+        },
+        {
+          "year": 2006,
+          "month": 1,
+          "count": 1
+        },
+        {
+          "year": 2006,
+          "month": 2,
+          "count": 1
+        },
+        {
+          "year": 2006,
+          "month": 5,
+          "count": 3
+        },
+        {
+          "year": 2006,
+          "month": 9,
+          "count": 2
+        },
+        {
+          "year": 2006,
+          "month": 12,
+          "count": 1
+        },
+        {
+          "year": 2007,
+          "month": 1,
+          "count": 3
+        },
+        {
+          "year": 2007,
+          "month": 2,
+          "count": 1
+        },
+        {
+          "year": 2007,
+          "month": 5,
+          "count": 1
+        },
+        {
+          "year": 2007,
+          "month": 6,
+          "count": 3
+        },
+        {
+          "year": 2007,
+          "month": 7,
+          "count": 2
+        },
+        {
+          "year": 2007,
+          "month": 9,
+          "count": 1
+        },
+        {
+          "year": 2007,
+          "month": 11,
+          "count": 2
+        },
+        {
+          "year": 2007,
+          "month": 12,
+          "count": 4
+        },
+        {
+          "year": 2008,
+          "month": 2,
+          "count": 2
+        },
+        {
+          "year": 2008,
+          "month": 4,
+          "count": 2
+        },
+        {
+          "year": 2008,
+          "month": 7,
+          "count": 1
+        },
+        {
+          "year": 2008,
+          "month": 9,
+          "count": 3
+        },
+        {
+          "year": 2008,
+          "month": 10,
+          "count": 1
+        },
+        {
+          "year": 2009,
+          "month": 1,
+          "count": 4
+        },
+        {
+          "year": 2009,
+          "month": 2,
+          "count": 1
+        },
+        {
+          "year": 2009,
+          "month": 3,
+          "count": 2
+        },
+        {
+          "year": 2009,
+          "month": 4,
+          "count": 1
+        },
+        {
+          "year": 2009,
+          "month": 5,
+          "count": 3
+        },
+        {
+          "year": 2009,
+          "month": 9,
+          "count": 4
+        },
+        {
+          "year": 2009,
+          "month": 11,
+          "count": 2
+        },
+        {
+          "year": 2009,
+          "month": 12,
+          "count": 4
+        },
+        {
+          "year": 2010,
+          "month": 1,
+          "count": 4
+        },
+        {
+          "year": 2010,
+          "month": 4,
+          "count": 3
+        },
+        {
+          "year": 2014,
+          "month": 12,
+          "count": 4
+        },
+        {
+          "year": 2015,
+          "month": 8,
+          "count": 4
+        },
+        {
+          "year": 2017,
+          "month": 5,
+          "count": 4
+        }
+      ],
+      "zero_rate": 0.13257575757575757
+    },
+    "test_3_structural_breaks": {
+      "n_candidate_splits": 176,
+      "n_significant_breaks": 176,
+      "top_breaks": [
+        {
+          "year": 2010,
+          "month": 2,
+          "mean_before": 2.5,
+          "mean_after": 57.8,
+          "ratio": 23.06,
+          "p_value": 3.0570156079303646e-40
+        },
+        {
+          "year": 2009,
+          "month": 6,
+          "mean_before": 2.0,
+          "mean_after": 55.8,
+          "ratio": 28.32,
+          "p_value": 3.855347035063656e-40
+        },
+        {
+          "year": 2008,
+          "month": 11,
+          "mean_before": 1.5,
+          "mean_after": 54.1,
+          "ratio": 36.46,
+          "p_value": 3.9074259241695695e-40
+        },
+        {
+          "year": 2008,
+          "month": 5,
+          "mean_before": 1.4,
+          "mean_after": 52.6,
+          "ratio": 36.46,
+          "p_value": 1.4643641807685515e-39
+        },
+        {
+          "year": 2007,
+          "month": 11,
+          "mean_before": 1.3,
+          "mean_after": 51.2,
+          "ratio": 40.62,
+          "p_value": 2.973654332405799e-39
+        }
+      ],
+      "interpretation": "发现5个显著结构性断裂点"
+    },
+    "test_4_zero_inflation": {
+      "n_zeros": 35,
+      "n_total": 264,
+      "observed_zero_rate": 0.13257575757575757,
+      "expected_zero_rate_poisson": 3.4348225046056543e-19,
+      "zero_excess_ratio": 3.859755704930621e+17,
+      "vuong_z": 3675478875.9095287,
+      "zero_inflated": true,
+      "consecutive_zero_gaps": [
+        {
+          "start": "2004-01",
+          "end": "2004-10",
+          "length": 10
+        },
+        {
+          "start": "2004-12",
+          "end": "2005-09",
+          "length": 10
+        },
+        {
+          "start": "2006-03",
+          "end": "2006-04",
+          "length": 2
+        },
+        {
+          "start": "2006-10",
+          "end": "2006-11",
+          "length": 2
+        },
+        {
+          "start": "2018-04",
+          "end": "2018-05",
+          "length": 2
+        }
+      ],
+      "max_gap_months": 10
+    },
+    "test_5_yearly_uniformity": {
+      "yearly_results": [
+        {
+          "year": 2004,
+          "n_months_with_data": 1,
+          "total_obs": 3,
+          "chi2": null,
+          "p_value": null,
+          "uniform": null,
+          "note": "Insufficient months (< 6) for uniformity test",
+          "cv": 0.0
+        },
+        {
+          "year": 2005,
+          "n_months_with_data": 2,
+          "total_obs": 2,
+          "chi2": null,
+          "p_value": null,
+          "uniform": null,
+          "note": "Insufficient months (< 6) for uniformity test",
+          "cv": 0.0
+        },
+        {
+          "year": 2006,
+          "n_months_with_data": 7,
+          "total_obs": 23,
+          "chi2": 16.260869565217394,
+          "p_value": 0.012420198204525626,
+          "uniform": false,
+          "cv": 0.8408295480788572,
+          "note": null
+        },
+        {
+          "year": 2007,
+          "n_months_with_data": 10,
+          "total_obs": 36,
+          "chi2": 37.88888888888889,
+          "p_value": 1.8249826214222503e-05,
+          "uniform": false,
+          "cv": 1.0258991840344105,
+          "note": null
+        },
+        {
+          "year": 2008,
+          "n_months_with_data": 9,
+          "total_obs": 53,
+          "chi2": 60.60377358490565,
+          "p_value": 3.5479215522920467e-10,
+          "uniform": false,
+          "cv": 1.0693303634192266,
+          "note": null
+        },
+        {
+          "year": 2009,
+          "n_months_with_data": 11,
+          "total_obs": 62,
+          "chi2": 50.838709677419345,
+          "p_value": 1.870269093396023e-07,
+          "uniform": false,
+          "cv": 0.9055270224269805,
+          "note": null
+        },
+        {
+          "year": 2010,
+          "n_months_with_data": 12,
+          "total_obs": 482,
+          "chi2": 238.896265560166,
+          "p_value": 5.879191406688317e-45,
+          "uniform": false,
+          "cv": 0.7040137823412874,
+          "note": null
+        },
+        {
+          "year": 2011,
+          "n_months_with_data": 12,
+          "total_obs": 736,
+          "chi2": 260.03260869565213,
+          "p_value": 2.20772773545508e-49,
+          "uniform": false,
+          "cv": 0.5943947971325313,
+          "note": null
+        },
+        {
+          "year": 2012,
+          "n_months_with_data": 12,
+          "total_obs": 503,
+          "chi2": 66.10536779324056,
+          "p_value": 6.672921972909499e-10,
+          "uniform": false,
+          "cv": 0.3625220026043215,
+          "note": null
+        },
+        {
+          "year": 2013,
+          "n_months_with_data": 12,
+          "total_obs": 439,
+          "chi2": 33.59225512528474,
+          "p_value": 0.0004215906758895061,
+          "uniform": false,
+          "cv": 0.27662238401434264,
+          "note": null
+        },
+        {
+          "year": 2014,
+          "n_months_with_data": 12,
+          "total_obs": 305,
+          "chi2": 57.24262295081968,
+          "p_value": 3.001893145373425e-08,
+          "uniform": false,
+          "cv": 0.43322134179457733,
+          "note": null
+        },
+        {
+          "year": 2015,
+          "n_months_with_data": 12,
+          "total_obs": 577,
+          "chi2": 416.04679376083186,
+          "p_value": 2.3915849855243317e-82,
+          "uniform": false,
+          "cv": 0.8491475935513354,
+          "note": null
+        },
+        {
+          "year": 2016,
+          "n_months_with_data": 12,
+          "total_obs": 654,
+          "chi2": 228.86238532110096,
+          "p_value": 7.328623094061566e-43,
+          "uniform": false,
+          "cv": 0.5915593674353067,
+          "note": null
+        },
+        {
+          "year": 2017,
+          "n_months_with_data": 12,
+          "total_obs": 611,
+          "chi2": 389.1243862520459,
+          "p_value": 1.2437371391514696e-76,
+          "uniform": false,
+          "cv": 0.7980380876143803,
+          "note": null
+        },
+        {
+          "year": 2018,
+          "n_months_with_data": 10,
+          "total_obs": 448,
+          "chi2": 146.86607142857144,
+          "p_value": 3.929353140781469e-27,
+          "uniform": false,
+          "cv": 0.5725609594583955,
+          "note": null
+        },
+        {
+          "year": 2019,
+          "n_months_with_data": 12,
+          "total_obs": 609,
+          "chi2": 200.67487684729065,
+          "p_value": 5.388284563647552e-37,
+          "uniform": false,
+          "cv": 0.5740343170246774,
+          "note": null
+        },
+        {
+          "year": 2020,
+          "n_months_with_data": 12,
+          "total_obs": 571,
+          "chi2": 137.33625218914185,
+          "p_value": 5.6666955094645204e-24,
+          "uniform": false,
+          "cv": 0.4904271917969462,
+          "note": null
+        },
+        {
+          "year": 2021,
+          "n_months_with_data": 12,
+          "total_obs": 975,
+          "chi2": 279.60923076923075,
+          "p_value": 1.7128556764007062e-53,
+          "uniform": false,
+          "cv": 0.5355172249562585,
+          "note": null
+        },
+        {
+          "year": 2022,
+          "n_months_with_data": 12,
+          "total_obs": 608,
+          "chi2": 152.85526315789474,
+          "p_value": 3.8873988547218645e-27,
+          "uniform": false,
+          "cv": 0.5014047096163784,
+          "note": null
+        },
+        {
+          "year": 2023,
+          "n_months_with_data": 12,
+          "total_obs": 1117,
+          "chi2": 159.69471799462846,
+          "p_value": 1.544920098088858e-28,
+          "uniform": false,
+          "cv": 0.3781104578663775,
+          "note": null
+        },
+        {
+          "year": 2024,
+          "n_months_with_data": 12,
+          "total_obs": 1080,
+          "chi2": 443.73333333333323,
+          "p_value": 3.1041777418344936e-88,
+          "uniform": false,
+          "cv": 0.6409868934158203,
+          "note": null
+        },
+        {
+          "year": 2025,
+          "n_months_with_data": 11,
+          "total_obs": 1330,
+          "chi2": 603.3203007518796,
+          "p_value": 3.422154282005876e-123,
+          "uniform": false,
+          "cv": 0.6735163593258956,
+          "note": null
+        }
+      ],
+      "n_years_tested": 20,
+      "n_uniform": 0,
+      "n_nonuniform": 20,
+      "uniformity_rate": 0.0
+    },
+    "test_6_yoy_growth": {
+      "yearly_counts": [
+        {
+          "year": 2004,
+          "count": 3,
+          "growth_rate": null
+        },
+        {
+          "year": 2005,
+          "count": 2,
+          "growth_rate": -0.33333333333333337
+        },
+        {
+          "year": 2006,
+          "count": 23,
+          "growth_rate": 10.5
+        },
+        {
+          "year": 2007,
+          "count": 36,
+          "growth_rate": 0.5652173913043479
+        },
+        {
+          "year": 2008,
+          "count": 53,
+          "growth_rate": 0.4722222222222223
+        },
+        {
+          "year": 2009,
+          "count": 62,
+          "growth_rate": 0.16981132075471694
+        },
+        {
+          "year": 2010,
+          "count": 482,
+          "growth_rate": 6.774193548387097
+        },
+        {
+          "year": 2011,
+          "count": 736,
+          "growth_rate": 0.5269709543568464
+        },
+        {
+          "year": 2012,
+          "count": 503,
+          "growth_rate": -0.31657608695652173
+        },
+        {
+          "year": 2013,
+          "count": 439,
+          "growth_rate": -0.12723658051689857
+        },
+        {
+          "year": 2014,
+          "count": 305,
+          "growth_rate": -0.30523917995444194
+        },
+        {
+          "year": 2015,
+          "count": 577,
+          "growth_rate": 0.8918032786885246
+        },
+        {
+          "year": 2016,
+          "count": 654,
+          "growth_rate": 0.1334488734835355
+        },
+        {
+          "year": 2017,
+          "count": 611,
+          "growth_rate": -0.06574923547400613
+        },
+        {
+          "year": 2018,
+          "count": 448,
+          "growth_rate": -0.2667757774140753
+        },
+        {
+          "year": 2019,
+          "count": 609,
+          "growth_rate": 0.359375
+        },
+        {
+          "year": 2020,
+          "count": 571,
+          "growth_rate": -0.06239737274220036
+        },
+        {
+          "year": 2021,
+          "count": 975,
+          "growth_rate": 0.7075306479859895
+        },
+        {
+          "year": 2022,
+          "count": 608,
+          "growth_rate": -0.3764102564102564
+        },
+        {
+          "year": 2023,
+          "count": 1117,
+          "growth_rate": 0.837171052631579
+        },
+        {
+          "year": 2024,
+          "count": 1080,
+          "growth_rate": -0.033124440465532645
+        },
+        {
+          "year": 2025,
+          "count": 1330,
+          "growth_rate": 0.2314814814814814
+        }
+      ],
+      "mean_growth_rate": 0.9658277860966226,
+      "std_growth_rate": 2.647069865606317,
+      "growth_anomalies": [
+        {
+          "year": 2006,
+          "count": 23,
+          "growth_rate": 10.5,
+          "z_score": 3.6017833672552326
+        },
+        {
+          "year": 2010,
+          "count": 482,
+          "growth_rate": 6.774193548387097,
+          "z_score": 2.1942623569401167
+        }
+      ],
+      "trend": {
+        "slope": 0.2283738334133026,
+        "r_squared": 0.6937015639169033,
+        "p_value": 1.5083710435245981e-06,
+        "interpretation": "年均增长率约25.7%"
+      }
+    },
+    "test_7_seasonal_pattern": {
+      "valid_years": [
+        2008,
+        2009,
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016,
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "n_valid_years": 18,
+      "monthly_profile": [
+        {
+          "month": 1,
+          "mean": 34.22222222222222,
+          "std": 20.328350401972106
+        },
+        {
+          "month": 2,
+          "mean": 51.888888888888886,
+          "std": 56.13417632453501
+        },
+        {
+          "month": 3,
+          "mean": 50.77777777777778,
+          "std": 32.299254326769834
+        },
+        {
+          "month": 4,
+          "mean": 37.888888888888886,
+          "std": 37.78871429546889
+        },
+        {
+          "month": 5,
+          "mean": 40.27777777777778,
+          "std": 35.330049791935664
+        },
+        {
+          "month": 6,
+          "mean": 58.94444444444444,
+          "std": 61.76756451523559
+        },
+        {
+          "month": 7,
+          "mean": 62.22222222222222,
+          "std": 41.38848313175674
+        },
+        {
+          "month": 8,
+          "mean": 46.44444444444444,
+          "std": 36.66898388399885
+        },
+        {
+          "month": 9,
+          "mean": 89.16666666666667,
+          "std": 78.62962321580095
+        },
+        {
+          "month": 10,
+          "mean": 45.888888888888886,
+          "std": 32.80582604084559
+        },
+        {
+          "month": 11,
+          "mean": 57.611111111111114,
+          "std": 33.69960531954062
+        },
+        {
+          "month": 12,
+          "mean": 44.666666666666664,
+          "std": 32.59375616857423
+        }
+      ],
+      "kruskal_wallis_h": 15.538048123197102,
+      "kruskal_wallis_p": 0.15916539851605435,
+      "seasonal_effect_significant": false,
+      "interpretation": "无显著月度季节性差异"
+    },
+    "test_8_runs_test": {
+      "n_runs": 77,
+      "expected_runs": 132.99242424242425,
+      "z_statistic": -6.905729340118077,
+      "p_value": 4.994671343183654e-12,
+      "random": false,
+      "interpretation": "数据存在非随机聚集模式（可能提示系统性缺漏）"
+    }
+  },
+  "comprehensive_assessment": {
+    "issues": [
+      {
+        "severity": "HIGH",
+        "country": "UK",
+        "issue": "存在最长10个月的连续零值缺口",
+        "detail": [
+          {
+            "start": "2004-01",
+            "end": "2004-10",
+            "length": 10
+          },
+          {
+            "start": "2004-12",
+            "end": "2005-09",
+            "length": 10
+          },
+          {
+            "start": "2006-03",
+            "end": "2006-04",
+            "length": 2
+          },
+          {
+            "start": "2006-10",
+            "end": "2006-11",
+            "length": 2
+          },
+          {
+            "start": "2018-04",
+            "end": "2018-05",
+            "length": 2
+          }
+        ],
+        "impact": "早期数据稀疏，但主要分析集中在2017+，影响有限"
+      },
+      {
+        "severity": "MEDIUM",
+        "country": "UK",
+        "issue": "2018-04 观测数为零",
+        "impact": "单月缺失对年度聚合影响有限"
+      },
+      {
+        "severity": "MEDIUM",
+        "country": "UK",
+        "issue": "2018-05 观测数为零",
+        "impact": "单月缺失对年度聚合影响有限"
+      },
+      {
+        "severity": "MEDIUM",
+        "country": "UK",
+        "issue": "2025-12 观测数为零",
+        "impact": "单月缺失对年度聚合影响有限"
+      },
+      {
+        "severity": "LOW",
+        "country": "US",
+        "issue": "2025-10 观测数异常低 (3)",
+        "impact": "单月低值不影响年度分析"
+      },
+      {
+        "severity": "MEDIUM",
+        "country": "UK",
+        "issue": "在2010-02附近存在结构性断裂 (均值比=23.06)",
+        "impact": "可能反映数据源变化或采集方式调整"
+      },
+      {
+        "severity": "MEDIUM",
+        "country": "UK",
+        "issue": "在2009-06附近存在结构性断裂 (均值比=28.32)",
+        "impact": "可能反映数据源变化或采集方式调整"
+      },
+      {
+        "severity": "MEDIUM",
+        "country": "UK",
+        "issue": "在2008-11附近存在结构性断裂 (均值比=36.46)",
+        "impact": "可能反映数据源变化或采集方式调整"
+      },
+      {
+        "severity": "MEDIUM",
+        "country": "UK",
+        "issue": "在2008-05附近存在结构性断裂 (均值比=36.46)",
+        "impact": "可能反映数据源变化或采集方式调整"
+      },
+      {
+        "severity": "MEDIUM",
+        "country": "UK",
+        "issue": "在2007-11附近存在结构性断裂 (均值比=40.62)",
+        "impact": "可能反映数据源变化或采集方式调整"
+      }
+    ],
+    "n_high": 1,
+    "n_medium": 8,
+    "n_low": 1,
+    "overall_assessment": "存在需要关注的数据缺漏问题"
+  }
+}

@@ -1,0 +1,130 @@
+{
+  "method": "DID H3 Distance Verification",
+  "description": "验证global_A_regression_results.json中的H3距离变化结果",
+  "computed_results": {
+    "average_distances": {
+      "pre_aukus_avg_distance": 0.14770559437197525,
+      "post_aukus_avg_distance": 0.1759168328490801,
+      "percent_change": 19.09964114565554
+    },
+    "pairwise_distances": {
+      "US_UK": {
+        "pre": 0.15045939251982024,
+        "post": 0.17036045533600386,
+        "change_percent": 13.226866387594926
+      },
+      "US_AU": {
+        "pre": 0.16372446928328274,
+        "post": 0.19172832946177154,
+        "change_percent": 17.104260774872557
+      },
+      "UK_AU": {
+        "pre": 0.12893292131282272,
+        "post": 0.1656617137494649,
+        "change_percent": 28.486744938888936
+      }
+    }
+  },
+  "verification": {
+    "matches": [
+      {
+        "name": "pre_aukus_avg_distance",
+        "computed": 0.14770559437197525,
+        "original": 0.14770559437197525,
+        "diff": 0.0,
+        "rel_diff": 0.0,
+        "match": true
+      },
+      {
+        "name": "post_aukus_avg_distance",
+        "computed": 0.1759168328490801,
+        "original": 0.1759168328490801,
+        "diff": 0.0,
+        "rel_diff": 0.0,
+        "match": true
+      },
+      {
+        "name": "percent_change",
+        "computed": 19.09964114565554,
+        "original": 19.09964114565554,
+        "diff": 0.0,
+        "rel_diff": 0.0,
+        "match": true
+      },
+      {
+        "name": "US_UK_pre",
+        "computed": 0.15045939251982024,
+        "original": 0.15045939251982024,
+        "diff": 0.0,
+        "rel_diff": 0.0,
+        "match": true
+      },
+      {
+        "name": "US_UK_post",
+        "computed": 0.17036045533600386,
+        "original": 0.17036045533600386,
+        "diff": 0.0,
+        "rel_diff": 0.0,
+        "match": true
+      },
+      {
+        "name": "US_UK_change_percent",
+        "computed": 13.226866387594926,
+        "original": 13.226866387594926,
+        "diff": 0.0,
+        "rel_diff": 0.0,
+        "match": true
+      },
+      {
+        "name": "US_AU_pre",
+        "computed": 0.16372446928328274,
+        "original": 0.16372446928328274,
+        "diff": 0.0,
+        "rel_diff": 0.0,
+        "match": true
+      },
+      {
+        "name": "US_AU_post",
+        "computed": 0.19172832946177154,
+        "original": 0.19172832946177154,
+        "diff": 0.0,
+        "rel_diff": 0.0,
+        "match": true
+      },
+      {
+        "name": "US_AU_change_percent",
+        "computed": 17.104260774872557,
+        "original": 17.104260774872557,
+        "diff": 0.0,
+        "rel_diff": 0.0,
+        "match": true
+      },
+      {
+        "name": "UK_AU_pre",
+        "computed": 0.12893292131282272,
+        "original": 0.12893292131282272,
+        "diff": 0.0,
+        "rel_diff": 0.0,
+        "match": true
+      },
+      {
+        "name": "UK_AU_post",
+        "computed": 0.1656617137494649,
+        "original": 0.1656617137494649,
+        "diff": 0.0,
+        "rel_diff": 0.0,
+        "match": true
+      },
+      {
+        "name": "UK_AU_change_percent",
+        "computed": 28.486744938888936,
+        "original": 28.486744938888936,
+        "diff": 0.0,
+        "rel_diff": 0.0,
+        "match": true
+      }
+    ],
+    "mismatches": []
+  },
+  "conclusion": "divergence"
+}
