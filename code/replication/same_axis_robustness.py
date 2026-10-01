@@ -1,18 +1,5 @@
-"""Same-axis robustness of the alternative encoders (cross-encoder test, Table 8; a post-hoc description in no test family).
-
-For each alternative encoder (and for the baseline encoder cut to the 37,808 common-support rows) the robustness
-models of :mod:`replication.analysis` run unchanged on the reference axes PC1-PC3 and stand beside the same models on
-the encoder's own axes:
-
-* placebos on the real pre-signing sample with fake cut-offs year >= 2020 and year >= 2021;
-* the parallel-trends event study (US-UK 2014-2024, base year 2021) with the joint Wald test;
-* the year fixed-effects model with the Post main effect, and the 2017+ sample;
-* the main model (for context).
-
-Wild cluster bootstrap B = 1,000, seeds 42/43/44; se_MC = sqrt(p (1 - p) / B) beside every bootstrap p; the own PC1 is
-oriented by the sign of its loading's inner product with the reference PC1 loading, and marked "direction not
-comparable" when |cos| < 0.30 (p kept). Writes results/cross_encoder/same_axis_robustness/<encoder>.json, the summary
-and a CSV table.
+"""Same-axis robustness of the alternative encoders (Table 8): the placebo, parallel-trends, year fixed-effects
+and 2017+ models on the reference axes PC1-PC3 beside the same models on each encoder's own axes.
 """
 from __future__ import annotations
 
@@ -35,7 +22,6 @@ SUMMARY_ROWS = ('placebo_2020.UK_x_fake_post', 'placebo_2021.UK_x_fake_post', 'p
 
 
 def variance_shares(Y, S) -> list:
-    """Share of the total variance of Y (ddof = 1) on each axis."""
     total = float(np.var(np.asarray(Y, dtype=np.float64), axis=0, ddof=1).sum())
     return [float(np.var(S[:, k], ddof=1) / total) for k in range(S.shape[1])]
 
@@ -55,8 +41,6 @@ def same_axis(Y, meta, axes) -> dict:
 
 
 def own_axis_computed(Y, meta, axes) -> dict:
-    """The baseline encoder on the common rows: own PCA-3 fitted on these rows (full solver), oriented by the reference
-    PC1 loading."""
     pca3 = pca.fit_pca(Y, 3)
     S3 = pca3.transform(Y)
     return {'scores3': S3, 'orientation': analysis.orientation(pca3.components_, axes['components']),
@@ -133,7 +117,6 @@ def build(slot: str, baseline_e0: bool, Y, meta, axes, own: dict) -> dict:
 
 
 def run_all(axes: dict, analyses: dict, baseline_meta) -> dict:
-    """Every encoder; ``analyses``: the alternative encoders' analysis results (plain dicts, as written)."""
     results = {}
     rows = pipeline.common_rows('targets')
     Y = pipeline.load_fit(data.BASELINE)['Y'][rows]

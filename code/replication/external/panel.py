@@ -1,14 +1,5 @@
-"""The estimation panel of one encoder: the three-country rows of its main analysis and the Singapore / Canada rows
-of its external-control encoding, both measured by the three-country A of the main analysis.
-
-* Y of a control row = (U - U_mean_3c) A^T with the main-analysis A and U_mean (never refitted).
-* Same-axis scores: the reference axes: (Y - mean) components^T, PC1-3.
-* Same-procedure scores: the encoder's own PCA-3 of its three-country Y (all rows of the main-analysis Y table,
-  ``svd_solver='full'``, the main-analysis rule), re-fitted from that Y and checked against the explained variance
-  ratios of the main analysis; PC_k is oriented by the sign of its loading's inner product with the
-  reference PC_k loading (PC1: the design rule, checked against the recorded orientation; PC2/PC3: the same
-  rule, descriptive). Controls never enter A or either PCA.
-* Rows up to 2025-11; ``post`` = year_month >= 2021-09 (as in the original analysis; 2021-09 wholly post).
+"""The estimation panel of one encoder: the three-country rows and the Singapore / Canada rows, scored on the
+reference axes and on the encoder's own PCA-3 with the A matrix of the main analysis.
 """
 from __future__ import annotations
 
@@ -52,9 +43,6 @@ def scores(Y: np.ndarray, axes: dict, own: dict) -> np.ndarray:
 
 def build(bound: dict, U_targets: np.ndarray, target_rows: pd.DataFrame, target_meta: pd.DataFrame,
           documents: pd.DataFrame) -> tuple:
-    """(panel, record). ``target_rows``: the rows table of the encoding (row keys in encoding order); ``target_meta``:
-    the metadata of the external-control target occurrences; ``documents``: the external-control document table
-    (publication date, genre)."""
     last = month_index(external_params('extract')['cut_last_month'])
     first_post = month_index(external_params('extract')['post_first_month'])
     y = bound['y_table']

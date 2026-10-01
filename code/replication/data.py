@@ -1,9 +1,4 @@
-"""Plain access to the data bundle (see data/README.md for its contents).
-
-The bundle directory is ``data/bundle`` inside the package, or the directory named by the environment variable
-``REPLICATION_DATA``. Every file is listed with its sha256 in ``data/MANIFEST.sha256``; README section 4 shows how to
-verify them (shasum -c).
-"""
+"""Access to the data bundle (data/bundle, or the directory named by REPLICATION_DATA); see data/README.md."""
 from __future__ import annotations
 
 import json
@@ -44,7 +39,6 @@ def results_dir() -> Path:
 
 # --------------------------------------------------------------------------- corpus
 def occurrence_meta(columns=None) -> pd.DataFrame:
-    """Metadata of the 37,866 occurrences (row order of every analysis of the baseline encoder)."""
     return pd.read_parquet(path('corpus/occurrences.parquet'), columns=list(columns or META_COLUMNS))
 
 
@@ -53,8 +47,6 @@ def analysis_meta() -> pd.DataFrame:
 
 
 def original_vectors() -> np.ndarray:
-    """The semantic vectors of the original submission (``Y_vector_global``, float64, 37,866 x 768): the basis of the
-    reference axes and of the original Figures 1-2."""
     import pyarrow.parquet as pq
     array = pq.read_table(path('corpus/occurrences.parquet'), columns=['Y_vector_global']).column(0).combine_chunks()
     values = array.values.to_numpy(zero_copy_only=False)
@@ -65,18 +57,14 @@ def original_vectors() -> np.ndarray:
 
 
 def anchor_words() -> list:
-    """The 100 anchor words (list order)."""
     return list(json.loads(path('corpus/anchor_words.json').read_text(encoding='utf-8')).get('words', []))
 
 
 def anchor_occurrences() -> pd.DataFrame:
-    """The 49,999 anchor occurrences of the A matrix (row order of every anchor encoding), with their anchor word."""
     return pd.read_parquet(path('corpus/anchor_occurrences.parquet'))
 
 
 def common_support_map() -> pd.DataFrame:
-    """Rows kept by all five encoders (truncation at 512 tokens never removes the masked term): original row index,
-    row key and position, separately for target and anchor occurrences."""
     return pd.read_parquet(path('corpus/common_support_map.parquet'))
 
 
@@ -86,7 +74,6 @@ def terms() -> pd.DataFrame:
 
 # --------------------------------------------------------------------------- encodings
 def encoding(encoder: str, kind: str) -> tuple:
-    """(U float32, rows DataFrame with row_key) of one encoder's target or anchor occurrences."""
     U = np.load(path(f'encodings/{encoder}/{kind}_U.npy'))
     rows = pd.read_parquet(path(f'encodings/{encoder}/{kind}_rows.parquet'))
     if U.dtype != np.float32 or len(U) != len(rows):
@@ -95,7 +82,6 @@ def encoding(encoder: str, kind: str) -> tuple:
 
 
 def external_encoding(encoder: str) -> tuple:
-    """(U float32, rows) of one encoder's Singapore / Canada target occurrences."""
     U = np.load(path(f'external_controls/encodings/{encoder}/targets_U.npy'))
     rows = pd.read_parquet(path(f'external_controls/encodings/{encoder}/targets_rows.parquet'))
     if U.dtype != np.float32 or len(U) != len(rows):

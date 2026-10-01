@@ -1,15 +1,8 @@
 #!/usr/bin/env python3
-"""Step 0: the measurement of every encoder.
-
-* the reference axes: PCA-88 (full SVD) of the original semantic vectors of all 37,866 occurrences;
-* the GPT-2 labels of the 100 anchor words;
-* for each of the five encoders, the A matrix fitted on the anchor occurrences and the semantic vectors
-  Y = (U - U_mean) A^T of the target occurrences (baseline encoder: 37,866 rows; alternative encoders: the 37,808
-  common-support rows).
-
-Writes results/intermediate/ (reference_axes.npz, <encoder>_A.npz, <encoder>_Y.npy, <encoder>_A_fit.json).
+"""Step 0: the reference axes, the GPT-2 anchor labels and, for each encoder, the A matrix and the semantic
+vectors Y. Writes results/intermediate/.
 """
-import _common  # noqa: F401  (paths, BLAS threads)
+import _common  # noqa: F401
 
 from replication import data, output, pca, pipeline
 

@@ -1,40 +1,5 @@
-"""The inference selection: the result-blind selection of the M1 inference and of the pre-trend slope inference.
-
-Design only (no outcome is read): the frozen five error scenarios on the real rows of each window (S_SG, S_CA), Y = e
-(every estimand is 0). Candidates, frozen before any result (``external_params('inference_selection')``):
-
-* C1 / C2: the month-block bootstrap of :func:`replication.external.estimate.fit_spec` with L = 12 / 24 (the real draws, B,
-  seed, replacement draws and the <= 1% target-estimability rule; the +1 p value and the symmetric order-statistic
-  interval);
-* C3: the studentised (percentile-t) month-block bootstrap, L = 12: in every draw the month-clustered CR0 standard error
-  is re-estimated on the resampled data (every drawn copy of a month is a cluster; unit scores at the draw's
-  coefficients); T = t / SE, T* = (t* - t) / SE*; p = (1 + #{|T*| >= |T|}) / (B_e + 1); half-width SE x the order
-  statistic of |T*| (the same r rule, so "interval excludes 0" <=> "p < alpha");
-* C4: month-clustered CR2 (:class:`replication.external.escov.Cr2Month`) with the Satterthwaite (Bell-McCaffrey / Imbens-Kolesar)
-  t for single contrasts (HTZ for joint restrictions; the estimands in scope are single contrasts);
-* C5-C8: C1-C4 with the worst-case calibrated critical value: S = |estimate| / nominal 95% half-width; c*_a = the
-  maximum over the five development scenarios of the (1 - a) quantile of S; test S > c*_a; interval estimate +/-
-  c*_a x the nominal 95% half-width; p = the maximum over the scenarios of the development tail probability of S.
-
-Development (seed 20260928, 2,000 replications per scenario): a candidate is admitted when every scenario x estimand
-in scope has coverage95, coverage90 and size05 all 通过 (the thresholds of the simulation, one-sided 95% Clopper-Pearson bounds).
-Selection: the smallest worst-case size05 upper bound; ties -> the wider mean standardised 95% interval; then the
-candidate number. Verification: the winner with seed 20260929 (calibrated candidates keep the development critical
-values); anything other than 通过 everywhere -> the fallback: descriptive (it enters the Holm family with p = 1), no further
-switching.
-Reported: every candidate x scenario x estimand x metric with the Monte Carlo counts and bounds, the selection trace,
-the verification, the simulated sizes at alpha / j (j = 1..10) of the winner and its simulated-power MDE per unit
-error SD in each scenario (descriptive only).
-
-MDE (the frozen form MDE = (c + z_.80) x SE with c the critical value
-of the test actually used): :func:`observed_mde`. SE is the selected candidate's standard error on the real data and
-c its actual critical value on the SE scale (C8: the calibrated c*_a x the Satterthwaite t_.975 of the contrast) at the
-Holm first-step level alpha / m, with the unadjusted alpha alongside; MDE_sd = MDE / the locked pre-period SD, tiers
-0.10 / 0.25. Only the SE enters from the outcome (through the residuals); no estimate or p is returned. The
-five scenario MDEs never set a tier.
-
-Development admission of C5-C8 is in-sample (their critical values are calibrated on the same replications), which
-makes it nearly automatic; the independent-seed verification is the out-of-sample check.
+"""Selection of the M1 inference and of the pre-trend slope inference among eight candidates by a simulation on
+the design (no outcome is read), and the observed-precision MDE of the selected inference.
 """
 from __future__ import annotations
 
@@ -52,9 +17,9 @@ from .simulation import BlockProcedure, Errors, judge, with_row_ids
 
 METRICS = ('coverage95', 'coverage90', 'size05')
 
-# Scope statement of the selected inference (C8), copied into the summary records
-GUARANTEE_SCOPE = ('主推断为冻结五种误差情形校准的 CR2 统计量（C8）；开发模拟用于选择与校准，独立种子模拟支持预定的模拟验收标准'
-                   '（95% 覆盖 ≥ .93，5% 尺寸 ≤ .06）。该保障仅限于冻结的情形集合，不外推至任意相关结构；不保证精确 5% 尺寸'
+# scope note copied into the summary records
+GUARANTEE_SCOPE = ('主推断为按五种误差情形校准的 CR2 统计量（C8）；开发模拟用于选择与校准，独立种子模拟按预定的验收标准核验'
+                   '（95% 覆盖 ≥ .93，5% 尺寸 ≤ .06）。该保障仅限于这五种情形，不外推至任意相关结构；不保证精确 5% 尺寸'
                    '或 Holm 族错误率控制。')
 
 
@@ -68,8 +33,6 @@ def _spec(which: str, sample: str, block_length: int | None = None) -> est.Spec:
 
 # =========================================================================== base candidates (C1-C4)
 class BlockCandidate:
-    """C1 / C2: the month-block bootstrap with the candidate's block length."""
-
     def __init__(self, name, panel_r, which, sample, position, cache, targets, levels, block_length):
         self.name, self.levels = name, list(levels)
         self.proc = BlockProcedure(name, panel_r, _spec(which, sample, block_length), position, cache, targets)
@@ -82,7 +45,6 @@ class BlockCandidate:
         return {nm: {'estimate': v['estimate'], 'p': v['p'], 'h': v['h']} for nm, v in out.items()}
 
     def precision(self, E_base):
-        """Per estimand: the SE (the SD of the effective bootstrap draws t*) and the half-widths; no estimate."""
         pr = self.proc
         Hstar = np.tensordot(pr.M, pr.unit_scores(E_base), axes=(1, 0))
         st = pr.stats(E_base, self.levels)
@@ -91,8 +53,6 @@ class BlockCandidate:
 
 
 class StudentizedCandidate(BlockCandidate):
-    """C3: percentile-t month-block bootstrap with a month-clustered CR0 SE re-estimated in every draw."""
-
     chunk = 1024
 
     def __init__(self, name, panel_r, which, sample, position, cache, targets, levels, block_length):
@@ -138,13 +98,10 @@ class StudentizedCandidate(BlockCandidate):
         return out
 
     def precision(self, E_base):
-        """Per estimand: the month-clustered CR0 SE and the percentile-t half-widths; no estimate is returned."""
         return {nm: {'se': v['se'], 'h': v['h'], 'se_kind': 'month-clustered CR0'} for nm, v in self.stats(E_base).items()}
 
 
 class Cr2Candidate:
-    """C4: month-clustered CR2 with Satterthwaite t (single contrasts)."""
-
     def __init__(self, name, panel_r, which, sample, position, targets, levels):
         self.name, self.levels = name, list(levels)
         spec = _spec(which, sample)
@@ -180,8 +137,6 @@ class Cr2Candidate:
         return out
 
     def precision(self, E_base):
-        """Per estimand: the CR2 SE and the Satterthwaite half-widths. The coefficients enter only through the
-        residuals; no contrast estimate is formed."""
         E = E_base[self.rows]
         V = self.obj.contrast_cov(E - self.X @ (self.A @ E))
         out = {}
@@ -212,8 +167,6 @@ def build_candidates(panel_r, which, sample, position, cache, cfg) -> dict:
 # =========================================================================== simulation of the base candidates
 def simulate(panel: pd.DataFrame, sample: str, which: str, seed: int, cfg: dict | None = None,
              names: list | None = None, cache: est.DrawCache | None = None, progress=None) -> dict:
-    """Per base candidate (C1-C4, or ``names``), scenario and estimand: the per-replication estimate, p value and
-    half-widths at the frozen levels, from the frozen scenarios with ``seed`` (design only)."""
     cfg = external_params('inference_selection') if cfg is None else cfg
     sim = external_params('simulation')
     cache = est.DrawCache() if cache is None else cache
@@ -252,7 +205,7 @@ def simulate(panel: pd.DataFrame, sample: str, which: str, seed: int, cfg: dict 
 
 # =========================================================================== evaluation, calibration, selection
 def calibration(dev: dict, levels) -> dict:
-    """c*_a per estimand: the maximum over scenarios of the (1 - a) quantile of S = |estimate| / h_0.05 (development)."""
+    """c*_a = max over scenarios of the (1 - a) quantile of S = |estimate| / h_0.05."""
     out = {}
     for nm in next(iter(dev.values())):
         S = {scen: np.abs(v[nm]['estimate']) / v[nm]['h'][0.05] for scen, v in dev.items()}
@@ -273,7 +226,6 @@ def calibrated_p(S_obs: np.ndarray, null_S: dict) -> np.ndarray:
 
 
 def decisions(block: dict, cal: dict | None, alpha: float) -> tuple:
-    """(reject, half-width) arrays at level ``alpha`` for one scenario x estimand block (uncalibrated or calibrated)."""
     if cal is None:
         h = block['h'][alpha]
         return block['p'] < alpha, h
@@ -283,7 +235,6 @@ def decisions(block: dict, cal: dict | None, alpha: float) -> tuple:
 
 
 def evaluate(draws: dict, cal: dict | None, thr: dict) -> dict:
-    """Per scenario x estimand: the three judgements, the standardised width; and the worst-case size upper bound."""
     per, worst, widths = {}, 0.0, []
     for scen, block in draws.items():
         per[scen] = {}
@@ -305,7 +256,6 @@ def evaluate(draws: dict, cal: dict | None, thr: dict) -> dict:
 
 
 def candidate_views(dev_draws: dict, cfg: dict) -> dict:
-    """(draws, calibration or None) per candidate C1-C8 from the base-candidate development draws."""
     views = {}
     for name, c in cfg['candidates'].items():
         if c['kind'] == 'calibrated':
@@ -317,7 +267,6 @@ def candidate_views(dev_draws: dict, cfg: dict) -> dict:
 
 
 def select(dev: dict, cfg: dict, thr: dict) -> dict:
-    """Development evaluation of C1-C8, admission and the selection trace."""
     views = candidate_views(dev['draws'], cfg)
     evals = {name: evaluate(dev['draws'][base], cal, thr) for name, (base, cal) in views.items()}
     admitted = [n for n, e in evals.items() if e['admitted']]
@@ -331,7 +280,6 @@ def select(dev: dict, cfg: dict, thr: dict) -> dict:
 
 
 def holm_sizes(draws: dict, cal: dict | None) -> dict:
-    """Simulated sizes at alpha / j (j = 1..10) per scenario x estimand (p values; calibrated p for C5-C8)."""
     out = {}
     for scen, block in draws.items():
         out[scen] = {}
@@ -353,8 +301,6 @@ def _rate(x, n):
 
 
 def mde_unit(draws: dict, cal: dict | None, alpha: float, power: float = 0.80) -> dict:
-    """Per scenario x estimand: the smallest delta >= 0 with simulated power >= ``power`` at level ``alpha`` (the
-    estimate shifts by delta, half-widths do not; unit-variance errors)."""
     out = {}
     for scen, block in draws.items():
         out[scen] = {}
@@ -384,8 +330,6 @@ def mde_unit(draws: dict, cal: dict | None, alpha: float, power: float = 0.80) -
 
 # =========================================================================== driver (both windows, M1 and slope)
 def run(panel: pd.DataFrame, progress=None, cache: est.DrawCache | None = None) -> dict:
-    """The inference selection record: per procedure (M1, slope) and window, the development evaluation of C1-C8,
-    the selection trace, the verification of the winner (or the fallback), the alpha / j sizes and the MDE_unit."""
     cfg = external_params('inference_selection')
     thr = external_params('simulation')['thresholds']
     cache = est.DrawCache() if cache is None else cache
@@ -427,7 +371,6 @@ def _public(sel: dict) -> dict:
 # =========================================================================== application to the real panel (estimation)
 def _selected(panel: pd.DataFrame, blk: dict, which: str, sample: str, responses: list, cfg: dict,
               cache: est.DrawCache | None):
-    """(winner, its base candidate built on the real rows, the real responses, the calibration or None)."""
     winner = blk['winner']
     spec = cfg['candidates'][winner]
     base_name = spec['base'] if spec['kind'] == 'calibrated' else winner
@@ -442,7 +385,6 @@ def _selected(panel: pd.DataFrame, blk: dict, which: str, sample: str, responses
 
 
 def _lvl(d: dict, a: float):
-    """A dict keyed by level (float or its JSON string)."""
     if a in d:
         return d[a]
     for k, v in d.items():
@@ -453,9 +395,6 @@ def _lvl(d: dict, a: float):
 
 def apply(panel: pd.DataFrame, record: dict, which: str, sample: str, responses: list,
           cache: est.DrawCache | None = None) -> dict:
-    """The selected inference of ``which`` (M1 or slope) in ``sample`` on the real responses: per estimand in
-    scope and response, the estimate, p (calibrated p for C5-C8) and the 95% / 90% intervals of the selected candidate;
-    'descriptive' when the window fell back (it then enters the Holm family with p = 1)."""
     cfg = external_params('inference_selection')
     blk = record['procedures'][which][sample]
     targets = cfg['procedures'][which]['estimands']
@@ -489,8 +428,6 @@ def apply(panel: pd.DataFrame, record: dict, which: str, sample: str, responses:
 
 # =========================================================================== MDE (inference selection)
 def residual_sd(panel: pd.DataFrame, sample: str, responses: list) -> dict:
-    """The occurrence-weighted residual SD of the M1 fit per response (the scale of the unit-variance simulation
-    errors); no coefficient is returned."""
     spec = est.main_spec(sample)
     sub = est.select(panel, spec)
     post = est.post_indicator(sub, spec)
@@ -507,13 +444,6 @@ def residual_sd(panel: pd.DataFrame, sample: str, responses: list) -> dict:
 
 def observed_mde(panel: pd.DataFrame, record: dict, sample: str, responses: list, sd: dict,
                  cache: est.DrawCache | None = None) -> dict:
-    """The MDE (the frozen form MDE = (c + z_.80) x SE, c the critical value of the
-    test actually used) for the M1 inference selected in ``sample``: per estimand in scope and response, the selected
-    candidate's SE on the real data, its critical value on the SE scale at every frozen level a -- calibrated
-    candidates (C5-C8): c_a = c*_a x nominal 95% half-width / SE (C8: c*_a x the Satterthwaite t_.975 of the contrast);
-    uncalibrated: half-width at a / SE -- MDE_a = (c_a + z_.80) x SE and MDE_sd_a = MDE_a / the locked SD. The outcome
-    enters only through the residuals of the SE; no estimate or p is computed for, or returned by, this record.
-    A window without a verified candidate (selection fallback) has no MDE ('descriptive')."""
     cfg = external_params('inference_selection')
     blk = record['procedures']['M1'][sample]
     targets = cfg['procedures']['M1']['estimands']
@@ -549,9 +479,6 @@ def observed_mde(panel: pd.DataFrame, record: dict, sample: str, responses: list
 
 
 def mde_report(panel: pd.DataFrame, record: dict, sample: str, responses: list, sd: dict) -> dict:
-    """Descriptive only (never sets a tier): per level, estimand in scope and scenario, the
-    simulated-power MDE of the verified winner per unit error SD (``mde_unit``), and per response its conversion
-    MDE_unit x the M1 residual SD / the locked SD."""
     blk = record['procedures']['M1'][sample]
     if blk.get('mde_unit') is None:
         return {'status': blk.get('status'), 'reason': 'no verified candidate: descriptive (inference selection)'}

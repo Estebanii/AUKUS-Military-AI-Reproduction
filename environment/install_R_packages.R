@@ -2,8 +2,9 @@
 #   Rscript environment/install_R_packages.R
 # While these are the current CRAN versions, the CRAN binaries are installed (no compiler needed on macOS and Windows;
 # Linux installs from source). Once CRAN has newer versions, the exact versions are installed from the CRAN archive
-# with remotes::install_version (source: needs the toolchain of README section 3). Stops unless the installed versions
-# are exactly the reference versions. Dependencies are installed at their current CRAN versions.
+# with remotes::install_version (from source: needs a compiler toolchain, e.g. gfortran, GMP and Rust for the
+# dependencies of HonestDiD). Stops unless the installed versions are exactly the reference versions. Dependencies are
+# installed at their current CRAN versions.
 repos <- "https://cloud.r-project.org"
 want <- c(jsonlite = "2.0.0", HonestDiD = "0.2.8")
 type <- if (.Platform$pkgType == "source") "source" else "binary"

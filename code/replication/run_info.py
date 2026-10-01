@@ -1,12 +1,5 @@
-"""The record of a run, ``results/run_info.json``, and the check ``compare.py`` makes against it.
-
-``run_all.sh`` writes the record before the first script (``scripts/record_run.py``): a run id (UTC start time,
-package commit, data manifest), the commit of the package and where it was read (``git``: HEAD of a git checkout of the
-package; ``VERSION``: the commit id that ``git archive`` and GitHub's "Download ZIP" write into the file VERSION; None
-if neither is available), a fingerprint of the code that determines the results (sha256 over code/, scripts/,
-run_all.sh and environment/requirements.lock) and the sha256 of the data bundle's MANIFEST.sha256. ``compare.py``
-prints the record and reports a problem when it is missing, or when the commit, the code or the data bundle differs
-from the run's. A tree without .git is not a problem in itself.
+"""The run record results/run_info.json (run id, package commit, code checksum, data manifest checksum) and the
+check compare.py makes against it.
 """
 from __future__ import annotations
 
@@ -25,7 +18,6 @@ COMMIT_ID = re.compile(r'^[0-9a-f]{40}$')
 
 
 def git_head(package: Path = data.PACKAGE) -> str | None:
-    """HEAD of the package's own git checkout (None if the package is not the top of a git checkout)."""
     try:
         top = subprocess.run(['git', '-C', str(package), 'rev-parse', '--show-toplevel'], capture_output=True,
                              text=True, timeout=10)
@@ -39,8 +31,6 @@ def git_head(package: Path = data.PACKAGE) -> str | None:
 
 
 def version_file(package: Path = data.PACKAGE) -> str | None:
-    """The commit id in VERSION (written by ``git archive`` and GitHub's "Download ZIP" through export-subst; a git
-    checkout holds the unexpanded placeholder, and None is returned)."""
     try:
         text = (package / 'VERSION').read_text(encoding='utf-8').strip()
     except OSError:
@@ -49,7 +39,6 @@ def version_file(package: Path = data.PACKAGE) -> str | None:
 
 
 def package_commit(package: Path = data.PACKAGE) -> tuple:
-    """(commit id or None, source): git HEAD of a git checkout of the package, else the commit id in VERSION."""
     head = git_head(package)
     if head:
         return head, 'git'
@@ -92,7 +81,6 @@ def write(results: Path, bundle: Path) -> dict:
 
 
 def check(results: Path, bundle: Path) -> tuple:
-    """(record or None, problems): the run record of ``results`` against the current checkout, code and bundle."""
     path = Path(results) / NAME
     if not path.is_file():
         return None, [f'{path} is missing: these results were not produced by ./run_all.sh in this checkout '

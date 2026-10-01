@@ -1,11 +1,6 @@
-"""The A matrix of the embedding regression: a linear map from the encoder's hidden states to the GPT-2 label space.
-
-``A`` is the ridge solution (lambda = 0.1) of the centred anchor labels V on the whitened, centred hidden states U of
-the anchor occurrences, shrunk towards a Procrustes prior (Khodak et al. 2018, "A la carte" embeddings; Rodriguez,
-Spirling and Stewart 2023). Every step after the float32 input U is float64. The Procrustes prior is the rank-r part
-``W_r Z_r^T`` of the SVD of ``M = V_c^T U_w`` (r = #{singular values > 1e-8 x the largest}): M has rank at most (number
-of distinct labels - 1) = 99, so only this part is identified. The semantic vector of an occurrence is
-``Y = (U - U_mean) @ A.T`` (768 dimensions).
+"""The A matrix of the embedding regression: ridge regression (lambda = 0.1) of the centred GPT-2 anchor labels
+on the whitened, centred encoder states, shrunk towards a rank-truncated Procrustes prior. The semantic vectors
+are Y = (U - U_mean) A'.
 """
 from __future__ import annotations
 
@@ -35,7 +30,7 @@ class AFit:
 
 
 def compute_whitening_transform(X, eps=1e-6):
-    """ZCA whitening of X (eigenvalues clipped at ``eps``); dtype follows X."""
+    """ZCA whitening of X (eigenvalues clipped at eps)."""
     mean = X.mean(axis=0)
     X_c = X - mean
     cov = X_c.T @ X_c / (X.shape[0] - 1)
@@ -48,7 +43,7 @@ def compute_whitening_transform(X, eps=1e-6):
 
 
 def compute_procrustes_prior(U, V, rank_rel_tol):
-    """The rank-r part ``W_r @ Zt_r`` of the Procrustes solution, r = #{S > tol * S[0]}; also returns S."""
+    """The rank-r part W_r Zt_r of the Procrustes solution, r = #{S > tol * S[0]}."""
     U_c = U - U.mean(axis=0)
     V_c = V - V.mean(axis=0)
     M = V_c.T @ U_c
@@ -58,10 +53,6 @@ def compute_procrustes_prior(U, V, rank_rel_tol):
 
 
 def fit_a(U_matrix, word_labels, labels: dict, *, strict: bool = False) -> AFit:
-    """Fit A on the anchor occurrences (``U_matrix`` rows, their words ``word_labels``, the GPT-2 ``labels``).
-
-    ``strict`` (alternative encoders): a whitening or Procrustes step that cannot run raises instead of silently
-    falling back to no whitening / a zero prior. The baseline encoder uses the default."""
     p = params('a_matrix')
     lam, whiten, procrustes, eps = p['lambda'], p['whiten'], p['procrustes_prior'], p['whiten_eps']
     rank_tol = p['a0_rank_rel_tol']
@@ -85,7 +76,7 @@ def fit_a(U_matrix, word_labels, labels: dict, *, strict: bool = False) -> AFit:
             W_u, _, clipped = compute_whitening_transform(U_c, eps)
             U_c = U_c @ W_u
             diagnostics['whitening_eigenvalues_clipped'] = clipped
-        except Exception as error:  # noqa: BLE001 - original behaviour: fall back to no whitening
+        except Exception as error:  # noqa: BLE001
             if strict:
                 raise RuntimeError(f'strict A fit: whitening failed ({type(error).__name__}: {error})') from error
             diagnostics['whitening_error'] = f'{type(error).__name__}: {error}'
@@ -115,7 +106,6 @@ def fit_a(U_matrix, word_labels, labels: dict, *, strict: bool = False) -> AFit:
 
 
 def transform(U, A, U_mean):
-    """``(U - U_mean) @ A.T``."""
     single = U.ndim == 1
     if single:
         U = U.reshape(1, -1)

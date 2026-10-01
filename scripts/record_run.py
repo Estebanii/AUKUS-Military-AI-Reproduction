@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
-"""Record the run in results/run_info.json (run id, package commit, code fingerprint, data manifest sha256).
-
-run_all.sh calls it before the first script; compare.py checks the results against it (see README section 6).
-"""
+"""Record the run in results/run_info.json; run_all.sh calls it before the first script."""
 import _common  # noqa: F401
 
 from replication import data, run_info

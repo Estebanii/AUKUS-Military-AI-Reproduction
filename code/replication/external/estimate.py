@@ -1,32 +1,5 @@
-"""The models M0-M3 and estimands, and the fixed-priority pivoted-QR structural column handling.
-
-Models (PC score as the dependent variable, one PC and one axis per column of Y, OLS, occurrence equal weight
-unless a sensitivity item says otherwise):
-
-* M1 (main): Y = a + sum_g gamma_g D_g + beta_t (year - 2014) + beta_p Post + sum_g delta_g D_g x Post, g in
-  {US, UK, AU}, base = the control (SG or CA; both for the pooled sensitivity);
-* M2: the linear trend replaced by year FE, Post kept explicitly (Post varies within 2021);
-* M3 (sensitivity): M1 + term FE;
-* M0 (no control): the v1 main model (US base: UK, AU, trend, Post, UK x Post, AU x Post; the design of
-  :func:`replication.analysis.wcb_features`) on the same window, the same three-country rows, axis and weights as M1.
-
-Estimands: theta = delta_UK - delta_US (M0: the UK x Post coefficient, the v1 UK-US relative change), delta_UK,
-delta_US, delta_AU; theta_c - theta_M0 on the same draws.
-
-pre-trend slope diagnostic (model 'slope', ``pre_only``): pre-signing rows only (members + control, the
-sample's main window up to 2021-08); Y = a + sum_g gamma_g D_g + beta t + sum_g phi_g D_g t, t = (calendar month
-index - 2014-01) / 12 (a linear month trend, slope per year); estimands phi_US, phi_UK, phi_AU (each member's slope
-minus the control's) and theta_slope = phi_UK - phi_US; the same structural and estimability rules; the month-block
-calendar is the single pre layer (circular blocks over the pre-signing months, all countries synchronised).
-
-structural handling: the design matrix is built with every column; columns are visited in the fixed priority
-order constant, country levels, time terms, Post main effect, interactions, event-period terms (term FE last) and
-a column is dropped only if it is all zero or linearly dependent on the kept higher-priority columns (modified
-Gram-Schmidt with re-orthogonalisation on the weighted design; relative residual <= 1e-9). The column space is
-kept: e.g. AU observed on one side of a (fake) cut only makes D_AU x Post a copy of D_AU, so D_AU x Post is
-dropped and D_AU kept (AU is never merged into the control). A target contrast that is not in the row space of the
-full design is structurally not estimable ("不可用", never a sampling failure). The priority order and every drop
-are written to the output record.
+"""Models M0-M3 and the pre-trend slope model of the external-control analysis, their estimands, the structural
+column handling (fixed-priority pivoted QR) and the month-block bootstrap fit.
 """
 from __future__ import annotations
 
@@ -45,7 +18,6 @@ GROUPS = ('constant', 'country levels', 'time terms', 'Post main effect', 'inter
 
 @dataclass(frozen=True)
 class Spec:
-    """One estimation specification (sample, window, model and the sensitivity options)."""
     name: str
     sample: str = 'SG'                  # 'SG', 'CA' or 'SG+CA' (pooled control)
     start: str = '2014-01'
@@ -78,8 +50,6 @@ def main_spec(sample: str, model: str = 'M1', **kw) -> Spec:
 
 # =========================================================================== samples
 def select(panel: pd.DataFrame, spec: Spec, members_only: bool = False) -> pd.DataFrame:
-    """Rows of the specification: members (and the control(s) unless M0 / members_only) inside the window, after
-    the sensitivity filters; pre-period only for a fake cut."""
     countries = set(MEMBERS) | (set() if (members_only or spec.model == 'M0') else set(spec.controls))
     countries -= set(spec.drop_countries)
     ym = panel['ym'].to_numpy()
@@ -107,9 +77,6 @@ def post_indicator(sub: pd.DataFrame, spec: Spec) -> np.ndarray:
 
 
 def row_weights(sub: pd.DataFrame, spec: Spec, post: np.ndarray) -> tuple:
-    """(weights, record). occurrence: 1. document: 1 / occurrences of the row's document in the sample (each
-    document weighs 1). genre_fixed: each country's genre shares in every period set to its pre-period shares over
-    the genres present in both periods (other post genres weigh 0; may change the estimand)."""
     n = len(sub)
     if spec.weights == 'occurrence':
         return None, {'weights': 'occurrence equal weight'}
@@ -118,8 +85,7 @@ def row_weights(sub: pd.DataFrame, spec: Spec, post: np.ndarray) -> tuple:
         return 1.0 / counts, {'weights': 'document equal weight (1 / occurrences of the document)',
                               'documents': int(sub['doc_id'].nunique())}
     if spec.weights == 'genre_fixed':
-        # the composition is fixed only if every genre of a country appears in both periods;
-        # without that common support the item is "不可用" (dropping genres would change the estimand: a deviation)
+        # needs every genre of a country in both periods; otherwise 不可用
         w = np.ones(n)
         rec, missing = {}, {}
         for country, rows in sub.groupby('country').groups.items():
@@ -166,8 +132,6 @@ def _dummies(values: np.ndarray, prefix: str, base=None):
 
 
 def build_design(sub: pd.DataFrame, spec: Spec, post: np.ndarray) -> Design:
-    """The full design of M0-M3 in the column priority order (every column; :func:`structural` then drops only
-    redundant ones)."""
     n = len(sub)
     country = sub['country'].to_numpy()
     cols, names, groups = [np.ones(n)], ['intercept'], ['constant']
@@ -211,8 +175,7 @@ def build_design(sub: pd.DataFrame, spec: Spec, post: np.ndarray) -> Design:
 
 
 def slope_design(sub: pd.DataFrame, spec: Spec) -> Design:
-    """The pre-trend slope design: intercept; D_US, D_UK, D_AU; t (linear month trend, per year); D_g x t (member
-    slope minus the control's slope)."""
+    """intercept; D_US, D_UK, D_AU; t (linear month trend, per year); D_g x t."""
     n = len(sub)
     country = sub['country'].to_numpy()
     t = (sub['ym'].to_numpy(float) - month_index(f'{external_params("trend_origin_year")}-01')) / 12.0
@@ -283,9 +246,6 @@ def structural(X: np.ndarray, names: list, groups: list, w=None, tol: float | No
 
 
 def reduce_contrasts(design: Design, struct: dict, w=None) -> tuple:
-    """(reduced contrasts, status): a contrast is structurally estimable iff it lies in the row space of the full
-    weighted design; its value is then c'b for any least-squares solution, e.g. the reduced fit padded with zeros,
-    i.e. c restricted to the kept columns."""
     Xw = design.X if w is None else design.X * np.sqrt(np.asarray(w, float))[:, None]
     reduced, status = {}, {}
     for name, c in design.contrasts.items():
@@ -302,14 +262,13 @@ def reduce_contrasts(design: Design, struct: dict, w=None) -> tuple:
 
 # =========================================================================== fitting
 def unit_index(sub: pd.DataFrame, spec: Spec) -> tuple:
-    """(units per row, Layers) of the specification's resampling calendar."""
     from .common import month_label
     first_post = external_params('extract')['post_first_month']
     if spec.fake_cut is not None:
         end = month_label(month_index(first_post) - 1)
         layers = inf.month_layers(spec.start, min(spec.end, end, key=month_index), spec.fake_cut)
         labels = sub['ym'].map(month_label).to_numpy()
-    elif spec.pre_only:              # pre-trend slope diagnostic: one layer, the pre-signing months of the window
+    elif spec.pre_only:  # slope diagnostic: one layer of pre-signing months
         end = month_label(month_index(first_post) - 1)
         layers = inf.month_layers(spec.start, min(spec.end, end, key=month_index), first_post)
         labels = sub['ym'].map(month_label).to_numpy()
@@ -322,7 +281,7 @@ def unit_index(sub: pd.DataFrame, spec: Spec) -> tuple:
     else:
         layers = inf.month_layers(spec.start, spec.end, first_post)
         labels = sub['ym'].map(month_label).to_numpy()
-    if spec.drop_months:            # donut: the removed months leave the calendar (never resampled as empty units)
+    if spec.drop_months:  # donut: the removed months leave the calendar
         lo, hi = (month_index(m) for m in spec.drop_months)
         gone = {lab for lab in layers.labels if lo <= month_index(lab[:7]) <= hi}
         kept = [lab for lab in layers.labels if lab not in gone]
@@ -334,9 +293,6 @@ def unit_index(sub: pd.DataFrame, spec: Spec) -> tuple:
 
 
 class DrawCache:
-    """Block draws per (layers, block length, B, seed): every specification on one calendar shares them, so the
-    same months are resampled for all countries and all estimands."""
-
     def __init__(self, B: int | None = None, seed: int | None = None):
         self.B, self.seed, self.cache = B, seed, {}
 
@@ -350,9 +306,6 @@ class DrawCache:
 
 def fit_spec(panel: pd.DataFrame, spec: Spec, responses: list, cache: DrawCache, *, point: bool = True,
              keep_draws: bool = False) -> dict:
-    """Point estimates (``point``) and the month-block inference of every estimand of ``spec`` on every response
-    column. With ``point=False`` only the effective draws are produced (for the MDE: nothing that reveals an estimate is
-    returned except through the draws, which the caller reduces to SE / MDE)."""
     sub = select(panel, spec)
     post = post_indicator(sub, spec)
     w, w_record = row_weights(sub, spec, post)
@@ -412,15 +365,12 @@ def rows_by_country_period(sub: pd.DataFrame, post: np.ndarray) -> dict:
 
 
 def locked_sd(panel: pd.DataFrame, spec: Spec, responses: list) -> dict:
-    """The SD (ddof 1) of the pre-period scores of the estimation sample (members + control), occurrence equal
-    weight, per response column."""
     sub = select(panel, spec)
     pre = ~sub['post'].to_numpy(bool)
     return {r: float(np.std(sub.loc[pre, r].to_numpy(float), ddof=1)) for r in responses}
 
 
 def strip_private(obj):
-    """Drop the in-memory draw arrays (keys starting with '_') before writing."""
     if isinstance(obj, dict):
         return {k: strip_private(v) for k, v in obj.items() if not str(k).startswith('_')}
     if isinstance(obj, list):

@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
-"""H2 with the baseline encoder: Table 4 (subgroup DiD with a linear time trend, wild cluster bootstrap), Table 5
-(parallel-trends event study, joint Wald), Table 6 (placebos with fake cut-offs 2020 and 2021), the placebos with the
-time trend (footnote 80), the robustness models, the same-axis model on the reference axes, the orientation of the
-own PC1, and Figure 3 (event-study coefficients). Writes results/h2/{wcb,did,parallel_trends,placebo_with_trend,
-same_axis,orientation,meta}.json and results/figures/figure3_event_study.*
+"""H2 with the baseline encoder: Tables 4-6 (subgroup DiD, parallel trends, placebos), the placebo with the time
+trend (footnote 80), the same-axis model, the PC1 orientation and Figure 3. Writes results/h2/ and
+results/figures/figure3_event_study.*.
 """
 import _common  # noqa: F401
 

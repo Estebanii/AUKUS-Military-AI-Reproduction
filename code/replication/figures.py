@@ -1,8 +1,5 @@
-"""Figures 1-4 (the plotting code of the original figure script). Every figure is written as PNG and PDF, and the
-plotted numbers are written beside it as CSV (the figures are compared through these CSV files, not as images).
-
-Chinese labels need a CJK font; the first available of :data:`CJK_FONTS` is used. Without one the labels are drawn
-in English (the plotted data are the same).
+"""Figures 1-4. Each figure is written as PNG and PDF with its plotted numbers as CSV; Chinese labels need a CJK
+font, otherwise English labels are used.
 """
 from __future__ import annotations
 
@@ -47,7 +44,6 @@ COUNTRY_ZH = {'US': ('美国', 'United States'), 'UK': ('英国', 'United Kingdo
 
 
 def figure1_pca(Y, meta, stem: str) -> dict:
-    """PCA-3 (random_state from :mod:`replication.seeds`) of Y: PC1 x PC2 by country and by period, with centroids."""
     from sklearn.decomposition import PCA
     plt, cjk = _setup()
     model = PCA(n_components=3, random_state=seeds.FIGURE_PCA_RANDOM_STATE)
@@ -89,7 +85,6 @@ def figure1_pca(Y, meta, stem: str) -> dict:
 
 
 def figure2_tsne(Y, meta, stem: str) -> dict:
-    """PCA-50 then t-SNE (perplexity 30, 1,000 iterations; random states from :mod:`replication.seeds`)."""
     from sklearn.decomposition import PCA
     from sklearn.manifold import TSNE
     plt, cjk = _setup()
@@ -115,7 +110,6 @@ def figure2_tsne(Y, meta, stem: str) -> dict:
 
 
 def figure3_event_study(parallel_trends: dict, stem: str) -> None:
-    """UK x year coefficients (base year 2021) with b +/- 1.96 x bootstrap SE, PC1-PC3."""
     plt, cjk = _setup()
     rows = []
     for pc in ('PC1', 'PC2', 'PC3'):
@@ -152,7 +146,6 @@ def figure3_event_study(parallel_trends: dict, stem: str) -> None:
 
 
 def figure4_neighbours(h3: dict, stem: str, top_n: int = 15) -> None:
-    """Top-15 neighbour words after the signing per country; bars coloured by common / unique."""
     from matplotlib.patches import Patch
     plt, cjk = _setup()
     post = h3['post_aukus_analysis']

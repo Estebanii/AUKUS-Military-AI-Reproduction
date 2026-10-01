@@ -1,6 +1,5 @@
-"""Fixed parameters of the external-control analysis (Singapore and Canada as non-member controls; Table 9).
-
-Seeds and resampling counts come from :mod:`replication.seeds`. :func:`external_params` returns a deep copy of one section.
+"""Fixed parameters of the external-control analysis (Table 9). Seeds come from replication.seeds; external_params
+returns a deep copy of one section.
 """
 from __future__ import annotations
 
@@ -13,7 +12,7 @@ CONTROLS = ('SG', 'CA')
 MEMBERS = ('US', 'UK', 'AU')
 
 EXTERNAL_PARAMS = {
-    # the study window of every country ends 2025-11; 2021-09 is wholly post (month-level coding, as in the main analysis)
+    # every window ends 2025-11; 2021-09 is wholly post
     'extract': {'cut_last_month': '2025-11', 'post_first_month': '2021-09'},
     # windows of the two controls and of the sensitivity samples
     'windows': {'SG': {'start': '2014-01', 'end': '2025-11'}, 'CA': {'start': '2017-01', 'end': '2025-11'},
@@ -22,8 +21,7 @@ EXTERNAL_PARAMS = {
                 'SG_to_2023_12': {'start': '2014-01', 'end': '2023-12'},
                 'pooled': {'start': '2017-01', 'end': '2025-11'}},
     'trend_origin_year': 2014,
-    # fixed column priority of the pivoted QR (only columns linearly dependent on higher-priority columns are dropped;
-    # an all-zero column is dropped as well); term fixed effects come last
+    # column priority of the pivoted QR; term fixed effects last
     'column_priority': ['constant', 'country levels', 'time terms', 'Post main effect', 'interactions',
                         'event-period terms', 'term FE'],
     'qr_rel_tol': 1e-9,
@@ -37,7 +35,7 @@ EXTERNAL_PARAMS = {
                   'interval': 't +/- a_(B_e - r), r = ceil(alpha (B_e + 1)) - 2 (order statistic of |t*-t|)'},
     # fake cut-off diagnostic
     'fake_cutoffs': {'first': '2016-01', 'last': '2019-12', 'min_months_after': 18, 'alpha': 0.05, 'flag_above': 0.10},
-    # the document-cluster wild cluster bootstrap of the main analysis, reported beside (historical reference)
+    # document-cluster wild cluster bootstrap of the main analysis (reference)
     'wcb_v1': {'B': seeds.WCB_DRAWS, 'seed_base': seeds.WCB_SEED_BASE, 'weights': 'Rademacher', 'cluster': 'doc_id'},
     # minimum detectable effect
     'mde': {'z_power': 0.8416212335729143, 'power': 0.80, 'alpha': 0.05, 'tiers_sd': [0.10, 0.25], 'total_m': 10,
@@ -56,8 +54,7 @@ EXTERNAL_PARAMS = {
     'event_study': {'reference': '2020', 'pre_sets': {'SG': ['2014', '2015', '2016', '2017', '2018', '2019', '2021a'],
                                                       'CA': ['2017', '2018', '2019', '2021a']},
                     'post': ['2021b', '2022', '2023', '2024', '2025'], 'tost_sd': 0.10,
-                    # the saturated event study is descriptive; its Wald, TOST and HonestDiD appear only as
-                    # sensitivity under the estimators below
+                    # the saturated event study is descriptive; Wald, TOST and HonestDiD are sensitivity only
                     'inference': {
                         'decision': 'descriptive event study',
                         'reading': 'event-study coefficients are descriptive; Wald, TOST and HonestDiD on the saturated '
@@ -73,7 +70,7 @@ EXTERNAL_PARAMS = {
                     'sensitivity_estimators': [
                         {'name': 'hac_bartlett_iid_exact', 'bandwidth': 6},
                         {'name': 'cr2_month'}]},
-    # the low-dimensional pre-trend diagnostic (inference: the M1 synchronised month-block bootstrap)
+    # pre-trend slope diagnostic
     'pretrend': {'decision': 'pre-trend slope diagnostic', 'model': 'slope',
                  'rows': 'pre-signing rows only (ym <= 2021-08), members + control, the sample main window',
                  'trend': 'linear calendar-month trend (months since 2014-01) / 12: slopes per year',
@@ -84,7 +81,7 @@ EXTERNAL_PARAMS = {
                  'layers': 'one layer: the pre-signing calendar months of the window (circular blocks, all countries '
                            'resampled together)',
                  'statement': '只诊断线性偏离，不能代替逐期检验，也不能证明平行趋势成立（Roth 2022）'},
-    # the result-blind selection of the M1 inference and of the pre-trend slope test inference
+    # selection of the M1 and slope inference
     'inference_selection': {
         'decision': 'inference selection',
         'procedures': {'M1': {'estimands': ['theta', 'delta_UK'], 'report_also': ['delta_US', 'delta_AU']},
@@ -104,13 +101,13 @@ EXTERNAL_PARAMS = {
         'development_seed': SEED, 'verification_seed': seeds.EXTERNAL_VERIFICATION_SEED,
         'replications': seeds.EXTERNAL_SIMULATION_REPLICATIONS,
         'levels': [0.10, 0.05, 0.025, 0.0125, 0.005],
-        'admission': 'every scenario x estimand in scope: coverage95, coverage90 and size05 all 通过 (thresholds of '
+        'admission': 'every scenario x estimand in scope passes coverage95, coverage90 and size05 (thresholds of '
                      'the simulation section, one-sided 95% Clopper-Pearson bounds)',
         'selection': 'among admitted candidates the smallest worst-case size05 upper bound (over scenarios and estimands); '
                      'ties: the wider mean standardised 95% interval (mean half-width / simulated SD of the estimate, '
                      'averaged over scenarios and estimands); then the candidate number',
         'verification': 'the winner rerun with the verification seed, 2,000 replications per scenario (calibrated '
-                        'candidates keep the development critical values); every scenario x estimand x metric 通过, '
+                        'candidates keep the development critical values); every scenario x estimand x metric passes, '
                         'else fallback',
         'fallback': 'descriptive (enters the Holm family with p = 1); no further switching',
         'holm_levels': 'simulated sizes at alpha / j, j = 1..10 (verification replications)',
@@ -124,11 +121,11 @@ EXTERNAL_PARAMS = {
                 'formula': 'MDE_SD = (c*_{alpha/m} x t_{.975,nu} + z_.80) x SE_CR2 / SD_locked (C8: c* the calibrated '
                            'multiplier of the window, nu the Satterthwaite (BM/IK) df of the contrast)',
                 'tier_rule': 'observed_precision', 'power': 0.80,
-                'scenario_mde': 'descriptive only, never sets a tier: per scenario the simulated-power MDE per unit '
+                'scenario_mde': 'descriptive only (does not set a tier): per scenario the simulated-power MDE per unit '
                                 'error SD of the verified winner (a true effect delta shifts the estimate and leaves every '
                                 'half-width unchanged; the smallest delta >= 0 with power >= 0.80 over the verification '
                                 'replications), and its conversion x the M1 residual SD / the locked SD'}},
-    # coverage / size simulation of the procedures actually used (design only; no outcome is read)
+    # coverage / size simulation
     'simulation': {
         'decision': 'coverage / size simulation', 'replications': seeds.EXTERNAL_SIMULATION_REPLICATIONS,
         'seed': SEED, 'batch': 200,
@@ -144,9 +141,10 @@ EXTERNAL_PARAMS = {
                       'common_month_ar05': {'idiosyncratic': 0.6, 'document': 0.3, 'common_month': 0.1, 'rho': 0.5}},
         'procedures': ['M1', 'slope', 'slope_L3', 'slope_L12', 'es:hac_bartlett_iid_exact', 'es:cr2_month'],
         'thresholds': {'coverage95': 0.93, 'coverage90': 0.88, 'size05': 0.06},
-        'judgement': 'one-sided 95% Clopper-Pearson bounds: coverage 失败 if the upper bound < threshold, 通过 if the lower '
-                     'bound >= threshold, else 未定; size 失败 if the lower bound > .06, 通过 if the upper bound <= .06, '
-                     'else 未定; every scenario reported; 通过 is a simulation acceptance criterion, not a proof of validity',
+        'judgement': 'one-sided 95% Clopper-Pearson bounds; labels: coverage "失败" if the upper bound < threshold, '
+                     '"通过" if the lower bound >= threshold, else "未定"; size "失败" if the lower bound > .06, "通过" if '
+                     'the upper bound <= .06, else "未定"; every scenario reported; "通过" means the threshold is met in '
+                     'the simulation, not a proof of validity',
         'tost_boundary': {'epsilon_sd': 0.10, 'deviation': 'UK rows of 2021a shifted by +epsilon (delta_UK@2021a = '
                                                            'theta@2021a = epsilon; in the column space)',
                           'families': ['theta', 'delta_UK'], 'reading': 'descriptive: the rate of a TOST pass with one '
@@ -171,5 +169,4 @@ EXTERNAL_PARAMS = {
 
 
 def external_params(section: str | None = None):
-    """A deep copy of the parameters (or one section)."""
     return copy.deepcopy(EXTERNAL_PARAMS if section is None else EXTERNAL_PARAMS[section])

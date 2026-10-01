@@ -1,4 +1,4 @@
-"""Writing and reading the result files under ``results/`` (JSON, CSV) and a timing / memory log per script."""
+"""Writing and reading the result files under results/ (JSON, CSV) and a timing / memory log per script."""
 from __future__ import annotations
 
 import json
@@ -14,7 +14,6 @@ from . import data
 
 
 def plain(obj):
-    """A JSON-ready copy: numpy scalars and arrays become Python numbers and lists; tuples become lists."""
     if isinstance(obj, dict):
         return {str(k): plain(v) for k, v in obj.items()}
     if isinstance(obj, (list, tuple)):
@@ -63,8 +62,6 @@ def write_text(rel: str, text: str) -> Path:
 
 
 class Timer:
-    """Log the wall time and the peak resident memory of a script to results/logs/runtime.tsv."""
-
     def __init__(self, name: str):
         self.name, self.start = name, time.time()
 

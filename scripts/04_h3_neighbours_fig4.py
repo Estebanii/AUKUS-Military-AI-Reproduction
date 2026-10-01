@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""H3 with the baseline encoder: the 30 nearest GPT-2 vocabulary words (cosine) of each country's mean semantic vector
-before and after the signing, the words common to / unique among the three countries' top 15, and Figure 4.
-Writes results/h3/h3.json, results/h3/distances.json and results/figures/figure4_neighbours.*"""
+"""H3 with the baseline encoder: the nearest GPT-2 vocabulary words of each country's mean vector before and after
+the signing, and Figure 4. Writes results/h3/ and results/figures/figure4_neighbours.*.
+"""
 import _common  # noqa: F401
 
 from replication import analysis, data, figures, output, pipeline

@@ -1,34 +1,5 @@
-"""The event study (period coding 2014..2020, 2021a, 2021b, 2022..2025; base 2020), its sensitivity
-tests (joint test, TOST, HonestDiD) and the placebos.
-
-The event study is saturated in country x event period, so each coefficient's monthly scores sum to zero within its
-period and the monthly-score HAC is biased towards zero (balanced iid: E(V)/V = 1 - T_tau^-2 sum_{t,u in tau}
-k_b(t - u); b = 6: about 0.58 / 0.49 / 0.30 for 12 / 8 / 4 months). Hence:
-
-* the event-study coefficients are descriptive point estimates;
-* the Wald (joint), TOST and HonestDiD on the saturated event study are not valid inference; they are reported only
-  as sensitivity under the estimators of :mod:`replication.external.escov` (``external_params('event_study')
-  ['sensitivity_estimators']``): (a) the design-exact iid-corrected Bartlett HAC (iid-exact marginal variances) and
-  (b) month-clustered CR2 with Bell-McCaffrey / Imbens-Kolesar degrees of freedom and the HTZ joint test
-  (cross-month independence), each labelled with its assumption and the pre-specified simulation judgements;
-* the low-dimensional pre-trend diagnostic (:mod:`replication.external.pretrend`) is the inference on pre-trends (linear only);
-* no sampling-failure gate; structurally non-estimable or singular -> "不可用"; the month-block absence shares of the
-  event periods are kept as the result-independent record of why the draws are not used here.
-
-Implementation:
-
-* the event design: event-period FE with 2020 as the reference, D_g x period, theta@t = UK - US;
-* TOST by the item-wise interval rule;
-* HonestDiD: the coefficients and the full covariance re-expressed relative to the last pre period 2021a
-  (b' = L b, Sigma' = L Sigma L', :func:`renormalise`), the relative-magnitudes sensitivity through
-  ``honest_rm.R`` (:func:`run_honestdid`, with a summary of its grid warnings), and a closed-form identified set as
-  a cross-check (:func:`rm_identified_set`).
-
-Design rules: the frozen pre sets and HonestDiD time grid per window (S_SG: 2014-2019 and 2021a; S_CA 2017+:
-2017-2019 and 2021a); AU has coefficients only where it has observations. TOST: every pre coefficient's 90%
-interval inside +/-0.10 SD (the locked SD). HonestDiD: M-bar in {0, 0.25, ..., 2}, l_vec = equal weights over
-the post periods, alpha 0.05; any numerical failure is "不可用". Reported whatever they show; never used to change a
-window or model.
+"""The descriptive event study of the external-control analysis (base period 2020), its sensitivity checks
+(joint test, TOST, HonestDiD through R) and the placebos with fake cut-offs.
 """
 from __future__ import annotations
 
@@ -72,7 +43,7 @@ def period_order(periods) -> list:
 
 
 def build_event_design(sub: pd.DataFrame, spec: est.Spec) -> est.Design:
-    """intercept; D_US, D_UK, D_AU; period FE (reference 2020); D_g x period (every period except 2020)."""
+    """intercept; D_US, D_UK, D_AU; period FE (reference 2020); D_g x period."""
     reference = external_params('event_study')['reference']
     n = len(sub)
     country = sub['country'].to_numpy()
@@ -118,7 +89,6 @@ def build_event_design(sub: pd.DataFrame, spec: est.Spec) -> est.Design:
 
 
 def frozen_sets(spec: est.Spec) -> tuple:
-    """(sample, frozen pre periods, post periods) of the window."""
     es = external_params('event_study')
     sample = 'CA' if spec.sample == 'CA' else 'SG'
     pre_set = [p for p in es['pre_sets'][sample] if p >= spec.start[:4] or p == '2021a']
@@ -127,7 +97,6 @@ def frozen_sets(spec: est.Spec) -> tuple:
 
 
 def event_design(panel: pd.DataFrame, spec: est.Spec) -> dict:
-    """The rows, weights, full and structurally reduced event design of ``spec`` (no outcome is read)."""
     sub = est.select(panel, spec)
     post = est.post_indicator(sub, spec)
     w, w_record = est.row_weights(sub, spec, post)
@@ -139,8 +108,6 @@ def event_design(panel: pd.DataFrame, spec: est.Spec) -> dict:
 
 
 def period_absence(sub: pd.DataFrame, spec: est.Spec, cache: est.DrawCache | None) -> dict | None:
-    """Result-independent record of why the event study left the month-block draws: the share of the B main
-    draws that hold no month of an event period."""
     if cache is None:
         return None
     units, layers = est.unit_index(sub, spec)
@@ -154,18 +121,12 @@ def period_absence(sub: pd.DataFrame, spec: est.Spec, cache: est.DrawCache | Non
 
 
 def sensitivity_labels(simulation: dict | None, estimator: str) -> dict:
-    """The pre-specified simulation judgements of one sensitivity estimator (per coefficient and per family)."""
     proc = ((simulation or {}).get('procedures') or {}).get(f'es:{estimator}') or {}
     return {'coefficients': proc.get('by_item') or {}, 'families': proc.get('by_joint') or {}}
 
 
 def event_study(panel: pd.DataFrame, spec: est.Spec, responses: list, cache: est.DrawCache | None, sd: dict,
                 simulation: dict | None = None) -> dict:
-    """Per response column: the event coefficients (descriptive point estimates) and, per
-    sensitivity estimator of ``external_params('event_study')['sensitivity_estimators']`` (:mod:`replication.external.escov`),
-    the coefficient intervals, the joint test, TOST and HonestDiD on the frozen sets, each labelled with its
-    assumption and the pre-specified simulation judgements (``simulation``: the sample's block of the coverage /
-    size simulation). None of the sensitivity results is valid inference."""
     es = external_params('event_study')
     ed = event_design(panel, spec)
     sub, design, struct, contrasts, status = ed['sub'], ed['design'], ed['struct'], ed['contrasts'], ed['status']
@@ -248,13 +209,10 @@ def event_study(panel: pd.DataFrame, spec: est.Spec, responses: list, cache: est
 
 def family_tests(pre_names, post_names, names, estimates, cov, eps, intervals, obj, fam_name='', response='',
                  scale=None) -> tuple:
-    """(result, HonestDiD job or None) of one family under one sensitivity estimator: the joint test of the frozen
-    pre coefficients (``obj.joint``), TOST with that estimator's 90% intervals, and the HonestDiD inputs (pre + post
-    coefficients and their full covariance). Sensitivity only."""
     out = {'pre': pre_names, 'post': post_names, 'valid_inference': False}
     missing = [n for n in pre_names if n not in names]
     if missing:
-        reason = f'frozen pre coefficients not estimable (structural): {missing}'
+        reason = f'pre coefficients not estimable (structural): {missing}'
         out['joint'] = {'status': inf.UNAVAILABLE, 'reason': reason}
         out['tost'] = {'status': inf.UNAVAILABLE, 'reason': reason}
         out['honestdid'] = {'status': inf.UNAVAILABLE, 'reason': 'pre coefficients missing'}
@@ -270,7 +228,7 @@ def family_tests(pre_names, post_names, names, estimates, cov, eps, intervals, o
                     'within': None if ci is None else bool(-eps <= ci[0] and ci[1] <= eps)}
     flags = [v['within'] for v in items.values()]
     out['tost'] = {'epsilon': eps, 'items': items, 'pass': None if any(f is None for f in flags) else bool(all(flags)),
-                   'rule': "every frozen pre coefficient: its 90% interval (this estimator's reference distribution) "
+                   'rule': "every pre coefficient: its 90% interval (this estimator's reference distribution) "
                            'inside [-0.10 SD, +0.10 SD] (item-wise)'}
     if fam_name not in external_params('honestdid')['estimands'] or response not in external_params('honestdid')['responses']:
         out['honestdid'] = {'status': 'not run', 'reason': 'HonestDiD runs for theta and delta_UK on PC1'}
@@ -292,8 +250,6 @@ def family_tests(pre_names, post_names, names, estimates, cov, eps, intervals, o
 
 
 def run_honest_jobs(jobs: list) -> None:
-    """Run the HonestDiD jobs (independent R processes, 45-120 s each) concurrently and fill their results in place;
-    each result depends only on its own inputs."""
     if not jobs:
         return
     workers = max(1, min(len(jobs), os.cpu_count() or 1, 8))
@@ -305,9 +261,7 @@ def run_honest_jobs(jobs: list) -> None:
 
 # =========================================================================== HonestDiD
 def renormalise(names: list, betahat, sigma) -> dict:
-    """Coefficients relative to 2020 -> HonestDiD order relative to 2021a with the full
-    covariance (b' = L b, Sigma' = L Sigma L'); pre = the frozen pre periods except 2021a, then 2020 (-b_2021a);
-    post = the post periods."""
+    """Coefficients relative to 2020 -> HonestDiD order relative to 2021a, b' = L b, Sigma' = L Sigma L'."""
     es = external_params('event_study')
     reference = es['reference']
     periods = [n.split('@')[1] for n in names]
@@ -330,9 +284,6 @@ def renormalise(names: list, betahat, sigma) -> dict:
 
 
 def run_honestdid(betahat, sigma, num_pre: int, num_post: int, l_vec, mbar_grid: list | None = None) -> dict:
-    """HonestDiD relative-magnitudes sensitivity with the prespecified grid (``mbar_grid``: a single M-bar for the
-    in-restriction simulation check; the robust interval at an M-bar does not depend on the other grid values); any failure
-    raises (the caller writes "不可用")."""
     h = external_params('honestdid')
     payload = {'betahat': list(map(float, betahat)), 'sigma': np.asarray(sigma, float).ravel().tolist(),
                'numPrePeriods': num_pre, 'numPostPeriods': num_post, 'l_vec': list(map(float, l_vec)),
@@ -357,7 +308,7 @@ def run_honestdid(betahat, sigma, num_pre: int, num_post: int, l_vec, mbar_grid:
 
 
 def rm_identified_set(betahat, num_pre: int, num_post: int, l_vec, Mbar: float) -> list:
-    """Closed-form identified set of l' tau_post under Delta^RM (cross-check only)."""
+    """Closed-form identified set of l' tau_post under Delta^RM (cross-check)."""
     b = np.asarray(betahat, dtype=float)
     pre = np.concatenate([b[:num_pre], [0.0]])
     D = float(np.max(np.abs(np.diff(pre)))) if num_pre >= 1 else 0.0
@@ -369,8 +320,6 @@ def rm_identified_set(betahat, num_pre: int, num_post: int, l_vec, Mbar: float) 
 
 
 def honest_family(names: list, betahat, sigma) -> dict:
-    """Design for one family: rebase to 2021a (full covariance), l_vec = equal weights over the post periods,
-    the frozen M-bar grid; the robust intervals and the breakdown M-bar*; any failure -> "不可用"."""
     try:
         ren = renormalise(names, betahat, sigma)
         eig = np.linalg.eigvalsh(np.asarray(ren['sigma']))
@@ -380,7 +329,7 @@ def honest_family(names: list, betahat, sigma) -> dict:
         T = ren['numPostPeriods']
         l_vec = np.full(T, 1.0 / T)
         result = run_honestdid(ren['betahat'], ren['sigma'], ren['numPrePeriods'], T, l_vec)
-    except Exception as error:          # noqa: BLE001 - the design failure rule
+    except Exception as error:  # noqa: BLE001
         return {'status': inf.UNAVAILABLE, 'reason': f'{type(error).__name__}: {error}'[:600]}
     result['status'] = 'ok'
     result['renormalised'] = ren
@@ -392,23 +341,18 @@ def honest_family(names: list, betahat, sigma) -> dict:
 
 
 def honest_interval_at(names: list, betahat, sigma, Mbar: float) -> dict:
-    """The HonestDiD robust interval of the target at one M-bar (the frozen settings otherwise): rebased to
-    2021a with the full covariance; {'lb', 'ub', 'status'} (in-restriction simulation check)."""
     try:
         ren = renormalise(names, betahat, sigma)
         T = ren['numPostPeriods']
         res = run_honestdid(ren['betahat'], ren['sigma'], ren['numPrePeriods'], T, np.full(T, 1.0 / T), [Mbar])
         g = (res.get('grid') or [{}])[0]
         return {'status': 'ok', 'lb': g.get('lb'), 'ub': g.get('ub'), 'truncated': g.get('truncated')}
-    except Exception as error:          # noqa: BLE001 - recorded, never raised
+    except Exception as error:  # noqa: BLE001
         return {'status': inf.UNAVAILABLE, 'reason': f'{type(error).__name__}: {error}'[:300]}
 
 
 # =========================================================================== placebos
 def placebos(panel: pd.DataFrame, base: est.Spec, responses: list, cache: est.DrawCache) -> dict:
-    """Pre-period data only; fake cuts 2019-09 and 2020-09, and v1's year starts 2020 and 2021 (fake Post = year >=
-    2020 / 2021); M1 with the fake Post; month-block inference on each placebo's own layers (the pre-period months
-    split at the fake cut); sample sizes and layer lengths recorded."""
     from dataclasses import replace
     pl = external_params('placebo')
     cuts = list(pl['month_cuts']) + [f'{y}-01' for y in pl['v1_year_starts']]
@@ -416,5 +360,5 @@ def placebos(panel: pd.DataFrame, base: est.Spec, responses: list, cache: est.Dr
     for cut in cuts:
         spec = replace(base, name=f'{base.name}_placebo_{cut}', fake_cut=cut, model='M1')
         out[cut] = est.fit_spec(panel, spec, responses, cache)
-        out[cut]['origin'] = 'the design month cut' if cut in pl['month_cuts'] else "v1's year-start cut"
+        out[cut]['origin'] = 'month cut' if cut in pl['month_cuts'] else 'year-start cut (original analysis)'
     return out

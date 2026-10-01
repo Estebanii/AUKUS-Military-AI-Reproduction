@@ -5,7 +5,7 @@ import numpy as np
 
 
 class ExternalControlError(RuntimeError):
-    """An input or consistency check of the external-control analysis failed (nothing is written after it)."""
+    """Raised when an input or consistency check fails."""
 
 
 def month_index(label) -> int:

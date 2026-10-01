@@ -1,33 +1,5 @@
-"""Distance change between the US and UK conceptualisations (Table 7; a post-hoc description in no test family).
-
-Sample: US and UK occurrences of 2014-01 .. 2025-11 (month code 100 * year + month); pre-signing = month code < 202109,
-post = >= 202109 (the rows' ``post_aukus`` must agree).
-
-Spaces (baseline encoder): (a) main specification, the scores on the first 88 components of the encoder's own PCA,
-fitted on all rows and then cut to the sample; (b) the reference PC1; (c) the reference PC1-PC3; (d) the first 88
-reference axes; (e) the full 768-dimensional space Y; (f) the full space on the original manuscript's own sample (all
-rows, three pairs of countries; US-UK with inference, US-AU and UK-AU description only). Alternative encoders: (d).
-
-Statistic per space and period t: m_ct the occurrence mean of country c; V_ct = G/(G-1) (1/n^2) sum_d s_d s_d' the
-document-clustered covariance of the mean (s_d = sum_{i in d} (y_i - m_ct), G documents, n occurrences); the
-bias-corrected squared distance D2_t = |m_UK,t - m_US,t|^2 - tr V_UK,t - tr V_US,t (approximately bias-correcting;
-with unequal document sizes a small residual bias remains); the primary statistic delta_sq = D2_post - D2_pre.
-Described only: D_t = sign(D2_t) sqrt(|D2_t|), D_post - D_pre, the uncorrected |m_UK,t - m_US,t|.
-
-Inference: documents are resampled with replacement within each of the four country x period cells (G per cell),
-B = 2,000, ``numpy.random.default_rng(seeds.DISTANCE_SEED)``, fixed draw order (b = 0..B-1; cells US_pre, US_post,
-UK_pre, UK_post; ``integers(0, G, size=G)`` over the cell's documents in ``numpy.unique`` order; the sha256 of all draws
-is written). V is recomputed in every draw. The bootstrap population is the documents' empirical distribution, whose
-value of the statistic is the sample's uncorrected one, so the errors are e*_b = delta_sq*_b - delta_sq_uncorrected and
-the 95% pivot interval (Hall 1992) is [delta_sq - q_.975(e*), delta_sq - q_.025(e*)] (``numpy.quantile``, linear);
-p = (1 + #{|e*_b| >= |delta_sq|}) / (B + 1); se_MC = sqrt(p (1 - p) / B). Pre-stated reading by the sign of delta_sq
-and its interval: > 0 with the interval excluding 0 -> widened; the interval containing 0 -> no change detected;
-< 0 with the interval excluding 0 -> narrowed; an interval excluding 0 on the other side -> not applicable.
-
-Hard checks (a failure stops the script): the own PCA-88 PC1 gives the main-model UK x Post coefficient and the
-cumulative variance of the H1 analysis within 1e-10; the reference PC1 gives the same-axis UK x Post coefficient within
-1e-10; (f) the uncorrected distances of the three pairs, both periods, equal those of the neighbour-word analysis within
-1e-10 and the original manuscript's within 1e-4.
+"""Table 7: the change of the bias-corrected squared distance between the US and UK mean vectors from before to
+after the signing, with a pivot bootstrap over documents (B = 2,000).
 """
 from __future__ import annotations
 
@@ -54,7 +26,7 @@ PARAMS = {'countries': ['US', 'UK'], 'month_code': '100 * year + month', 'first_
                         'pairs': ['US_UK', 'US_AU', 'UK_AU'], 'inference_pairs': ['US_UK'],
                         'v1_tol': 1e-4, 'h3_distances_tol': 1e-10}}
 Y_DIM = 768
-CHUNK = 100                                # draws per matrix product (the draw order does not depend on it)
+CHUNK = 100  # draws per matrix product
 SPACE_NAMES = {'own_pca88': 'E0 自身 PCA 前 88 个主成分（H1 所用空间；主规格）',
                'ref_pc1': '参考轴 PC1（单维）',
                'ref_pc1_3': '参考轴 PC1–PC3',
@@ -83,7 +55,6 @@ def signed_root(x):
 
 
 def doc_sums(Z, doc_ids) -> tuple:
-    """(documents in ``numpy.unique`` order, rows per document, column sums of ``Z`` per document)."""
     docs, inverse = np.unique(np.asarray(doc_ids), return_inverse=True)
     inverse = np.asarray(inverse).reshape(-1)
     counts = np.bincount(inverse, minlength=len(docs))
@@ -94,8 +65,9 @@ def doc_sums(Z, doc_ids) -> tuple:
 
 
 def cell_moments(Z, doc_ids) -> dict:
-    """One country x period cell: n, G, the occurrence mean, the per-document sums s_d of (y_i - mean), and the
-    diagonal of the document-clustered covariance of the mean, V = G/(G-1) (1/n^2) sum_d s_d s_d'."""
+    """n, G, the cell mean, the per-document sums of (y_i - mean) and the diagonal of
+    V = G/(G-1) (1/n^2) sum_d s_d s_d'.
+    """
     Z = np.asarray(Z, dtype=np.float64)
     n = len(Z)
     mean = Z.mean(axis=0)
@@ -108,7 +80,6 @@ def cell_moments(Z, doc_ids) -> dict:
 
 
 def cell_moments_from_doc_sums(counts, raw_sums) -> dict:
-    """The same moments from per-document row counts and raw column sums (used by the synthetic calibration)."""
     counts = np.asarray(counts, dtype=np.float64)
     raw_sums = np.asarray(raw_sums, dtype=np.float64)
     n, G = float(counts.sum()), len(counts)
@@ -121,7 +92,6 @@ def cell_moments_from_doc_sums(counts, raw_sums) -> dict:
 
 
 def distance(uk: dict, us: dict, cols) -> dict:
-    """Bias-corrected distance of two cell means on the columns ``cols`` (a slice)."""
     gap = uk['mean'][cols] - us['mean'][cols]
     raw2 = float(gap @ gap)
     tr_uk, tr_us = float(uk['var_diag'][cols].sum()), float(us['var_diag'][cols].sum())
@@ -131,8 +101,6 @@ def distance(uk: dict, us: dict, cols) -> dict:
 
 
 def draws(G_by_cell: dict, B: int, seed: int):
-    """(b, cell, document indices) in the fixed order: b = 0..B-1, then the cells in :data:`CELLS` order; each draw
-    ``rng.integers(0, G, size=G)`` of ``numpy.random.default_rng(seed)``."""
     rng = np.random.default_rng(seed)
     for b in range(B):
         for cell in CELLS:
@@ -141,8 +109,6 @@ def draws(G_by_cell: dict, B: int, seed: int):
 
 
 def replicate_moments(mom: dict, W) -> tuple:
-    """Cell means and clustered-variance diagonals of the resampled cells given by the rows of ``W`` (how often each
-    document was drawn; every row sums to G). A document drawn twice counts as two clusters."""
     W = np.asarray(W, dtype=np.float64)
     G, n_d, T = mom['G'], mom['counts'], mom['sums']
     k = T.shape[1]
@@ -154,7 +120,6 @@ def replicate_moments(mom: dict, W) -> tuple:
 
 
 def draw_weights(G_by_cell: dict, B: int, seed: int, digest=None) -> dict:
-    """cell -> (B, G) matrix of how often each document was drawn in each resample (the order of :func:`draws`)."""
     W = {c: np.zeros((B, G_by_cell[c])) for c in CELLS}
     for b, cell, idx in draws(G_by_cell, B, seed):
         if len(idx) != G_by_cell[cell]:
@@ -166,7 +131,6 @@ def draw_weights(G_by_cell: dict, B: int, seed: int, digest=None) -> dict:
 
 
 def bootstrap(moments: dict, B: int, seed: int) -> dict:
-    """Means and variance diagonals of every cell in B resamples (documents with replacement within each cell)."""
     G = {c: moments[c]['G'] for c in CELLS}
     k = len(moments[CELLS[0]]['mean'])
     means = {c: np.empty((B, k)) for c in CELLS}
@@ -195,7 +159,6 @@ def bootstrap_from_weights(moments: dict, W: dict) -> dict:
 
 
 def replicate_squared(boot: dict, cols) -> dict:
-    """Bias-corrected squared distances D2*_t of every resample (V recomputed in every draw) and delta_sq*."""
     out = {}
     for t in ('pre', 'post'):
         gap = boot['means'][f'UK_{t}'][:, cols] - boot['means'][f'US_{t}'][:, cols]
@@ -219,8 +182,7 @@ def quantiles(values) -> tuple:
 
 
 def pivot(estimate: float, population: float, replicates) -> dict:
-    """The bootstrap errors e*_b = replicate_b - population and the pivot interval
-    [estimate - q_.975(e*), estimate - q_.025(e*)]."""
+    """e*_b = replicate_b - population; interval [estimate - q_.975(e*), estimate - q_.025(e*)]."""
     errors = np.asarray(replicates, dtype=np.float64) - population
     q_lo, q_hi = quantiles(errors)
     return {'interval_95': [estimate - q_hi, estimate - q_lo], 'errors': errors}
@@ -237,7 +199,6 @@ def pivot_p(estimate: float, errors) -> dict:
 
 
 def reading(estimate: float, interval) -> dict:
-    """The pre-stated mechanical reading by the sign of delta_sq and its interval (the p value does not enter)."""
     lo, hi = interval
     if lo <= 0 <= hi:
         key = 'not_detected'
@@ -251,7 +212,6 @@ def reading(estimate: float, interval) -> dict:
 
 
 def centring(point: dict, sqrt_reps: dict, sq_reps: dict, delta_sq: float, delta_sq_population: float) -> dict:
-    """Where the bootstrap distributions sit (a diagnostic; no reading)."""
     out = {'note': CENTRING_NOTE}
     for t in ('pre', 'post'):
         out[t] = {'mean_D_star': float(np.mean(sqrt_reps[t])), 'median_D_star': float(np.median(sqrt_reps[t])),
@@ -271,8 +231,6 @@ def centring(point: dict, sqrt_reps: dict, sq_reps: dict, delta_sq: float, delta
 
 
 def space_result(space: str, moments: dict, boot: dict, cols) -> dict:
-    """One space: delta_sq with its pivot interval, p and reading; the per-period D2 with the same pivot
-    construction; the square-root and uncorrected forms as description."""
     width = len(range(*cols.indices(len(moments[CELLS[0]]['mean']))))
     point = {t: distance(moments[f'UK_{t}'], moments[f'US_{t}'], cols) for t in ('pre', 'post')}
     sq = replicate_squared(boot, cols)
@@ -320,7 +278,6 @@ def bootstrap_record(boot: dict, B: int, seed: int) -> dict:
 
 
 def pair_description(first: dict, second: dict) -> dict:
-    """A descriptive pair of (f): per period D2, D and the uncorrected distance, and their changes."""
     point = {t: distance(second[t], first[t], slice(None)) for t in ('pre', 'post')}
     out = {t: {k: v for k, v in point[t].items() if k != 'gap'} for t in ('pre', 'post')}
     out['delta_sq'] = point['post']['D2'] - point['pre']['D2']
@@ -339,11 +296,6 @@ def check_item(value: float, reference, tol: float) -> dict:
 
 
 def v1_block(Y, meta, did_h3: dict, v1_distances: dict, B: int, seed: int) -> dict:
-    """(f): the full 768-dimensional space on the original manuscript's own sample (all rows) and its three pairs.
-    US-UK: statistic, pivot bootstrap and reading; US-AU, UK-AU: description only. Hard checks: the uncorrected
-    distances equal the neighbour-word analysis's (``did_h3``, the same reconstruction on the same Y) within 1e-10 and
-    the original manuscript's (``v1_distances``) within 1e-4, all pairs and periods; first months as stated; every row
-    in the sample."""
     spec = PARAMS['v1_sample']
     smp = v1_sample(meta)
     if smp['problems']:
@@ -392,8 +344,6 @@ def v1_block(Y, meta, did_h3: dict, v1_distances: dict, B: int, seed: int) -> di
 
 
 def define_cells(meta, countries, first=None, last=None) -> dict:
-    """Rows of ``countries`` with month code in [first, last] (None: unbounded), their country x period cell and the
-    structural problems."""
     import pandas as pd
     country = meta['country'].to_numpy().astype(str)
     year, month = meta['year'].to_numpy().astype(np.int64), meta['month'].to_numpy().astype(np.int64)
@@ -455,7 +405,6 @@ def v1_sample(meta) -> dict:
 
 
 def uk_x_post(pc1_scores, meta) -> float:
-    """The main-model UK x Post OLS coefficient on one score."""
     X, names = analysis.wcb_features(meta)
     XtX_inv = np.linalg.pinv(X.T @ X)
     beta = XtX_inv @ X.T @ np.asarray(pc1_scores, dtype=np.float64)
@@ -463,8 +412,6 @@ def uk_x_post(pc1_scores, meta) -> float:
 
 
 def space_matrix(baseline: bool, Y, axes: dict) -> tuple:
-    """(Z of all rows, space -> column slice, own PCA or None): baseline [own PCA-88 | reference 88 | Y (768)],
-    alternative encoders [reference 88]."""
     k = PARAMS['k']
     ref = pca.scores(Y, axes['mean'], axes['components'][:k])
     if not baseline:
@@ -478,7 +425,6 @@ def space_matrix(baseline: bool, Y, axes: dict) -> tuple:
 
 
 def hard_checks(baseline: bool, Z, spaces: dict, model, meta, reference: dict) -> dict:
-    """Checks against the H1 / H2 / same-axis results of the same Y (a failure stops the script)."""
     tol = PARAMS['hard_check_tol']
     n = len(meta)
     want = {'wcb n_samples': reference['wcb'].get('n_samples'), 'rows expected': reference['rows']}
@@ -500,7 +446,6 @@ def hard_checks(baseline: bool, Z, spaces: dict, model, meta, reference: dict) -
 
 def compute(baseline: bool, Y, meta, axes: dict, reference: dict, v1_distances: dict | None,
             B: int = PARAMS['B'], seed: int = PARAMS['seed']) -> dict:
-    """The full result of one encoder (stops on a failed hard check or a structural problem)."""
     smp = sample(meta)
     if smp['problems']:
         raise HardCheckError('; '.join(smp['problems']))
@@ -523,7 +468,6 @@ def compute(baseline: bool, Y, meta, axes: dict, reference: dict, v1_distances: 
 
 
 def summary_rows(results: list) -> list:
-    """One row per encoder and space (the combined table)."""
     return [{'encoder': r['encoder'], 'code': r['code'], 'space': space, 'name': s['name'], 'cells': r['cells'],
              'D2_pre': s['pre']['D2'], 'D2_pre_interval_95': s['pre']['D2_interval_95'],
              'D2_post': s['post']['D2'], 'D2_post_interval_95': s['post']['D2_interval_95'],

@@ -1,22 +1,8 @@
-# Rambachan-Roth relative-magnitudes sensitivity via the HonestDiD R package; called by
-# code/replication/external/eventstudy.py with the fixed Mbar grid {0, 0.25, ..., 2}.
-# Input JSON: betahat, sigma (row-major), numPrePeriods, numPostPeriods, l_vec, alpha,
-#             Mbar_grid, gridPoints, bisection_tol, max_doublings.
-# Output JSON: original CS, grid CIs, breakdown Mbar* (first Mbar whose robust CI contains 0),
-#              R warnings, and the grid-widening record of every reported robust CI.
-#
-# Grid rule (report layer only):
-#   1. Every Mbar is first run on HonestDiD's default theta grid, i.e. the plain call
-#      (grid.lb/grid.ub = NA -> +/- 20 x SE of l'beta_post, gridPoints = 1000). Whether the
-#      robust CI contains 0 -- and therefore the breakdown Mbar* and its bisection -- is decided
-#      on this default grid only, so Mbar* is unchanged by the widening below.
-#   2. If the default-grid CI is open at an endpoint (R warning "CI is open at one of the
-#      endpoints" or the accepted hull reaching a grid bound), the half-width is doubled with the
-#      grid step held constant (gridPoints' - 1 = 2 (gridPoints - 1)) until the CI is closed,
-#      at most max_doublings times. A grid Mbar starts its widening at the half-width that closed
-#      the previous (smaller) Mbar, because the Delta^RM sets are nested in Mbar. The reported
-#      lb/ub are those of the closed CI; the default-grid values are kept alongside.
-#   3. All R warnings are captured (never printed) and written per call.
+# HonestDiD relative-magnitudes sensitivity (Rambachan and Roth), called from eventstudy.py.
+# Input JSON: betahat, sigma, numPrePeriods, numPostPeriods, l_vec, alpha, Mbar_grid, gridPoints, bisection_tol,
+#             max_doublings. Output JSON: the original CS, the CI at each Mbar, the breakdown Mbar* and the R warnings.
+# Each Mbar is first run on the default theta grid; a CI open at an endpoint is rerun with the half-width doubled
+# (same step) at most max_doublings times.
 load_warnings <- character(0)
 withCallingHandlers({
   suppressPackageStartupMessages({

@@ -1,9 +1,5 @@
-"""GPT-2 labels of the anchor words and the GPT-2 vocabulary of the neighbour-word analysis.
-
-A label is the float32 mean of the GPT-2 input embeddings (``wte``) of the word's sub-tokens
-(``tokenizer.encode(word, add_special_tokens=False)``); the key is the lower-cased word; an empty tokenisation gives
-zeros. Labels depend only on GPT-2, never on the encoder being studied. The GPT-2 files are pinned
-(:data:`replication.params.GPT2`) and their sha256 are verified before use.
+"""GPT-2 labels of the anchor words (mean input embedding of the word's sub-tokens) and the GPT-2 vocabulary of
+the neighbour-word analysis.
 """
 from __future__ import annotations
 
@@ -30,7 +26,6 @@ def sha256_file(path) -> str:
 
 
 def resolve_gpt2(model_dir) -> dict:
-    """The pinned GPT-2 snapshot directory, every file checked against its pinned sha256."""
     model_dir = Path(model_dir)
     hashes = {name: sha256_file(model_dir / name) for name in GPT2_FILES if (model_dir / name).is_file()}
     wrong = {k: (hashes.get(k), v) for k, v in GPT2['files_sha256'].items() if hashes.get(k) != v}
@@ -40,7 +35,6 @@ def resolve_gpt2(model_dir) -> dict:
 
 
 def load_gpt2(source: dict):
-    """(tokenizer, wte float32 [vocab, 768]) from a resolved snapshot."""
     from safetensors import safe_open
     from transformers import AutoTokenizer
     tokenizer = AutoTokenizer.from_pretrained(source['dir'])
@@ -51,8 +45,6 @@ def load_gpt2(source: dict):
 
 
 def anchor_labels(words, tokenizer, wte) -> tuple:
-    """``(V_dict, token_ids)``: V_dict[word.lower()] = float32 mean of the word's GPT-2 ``wte`` rows (torch float32
-    mean, as in the original implementation); an empty tokenisation gives zeros."""
     import torch
     table = torch.from_numpy(np.ascontiguousarray(wte))
     labels, ids_out = {}, {}
@@ -70,7 +62,6 @@ def anchor_labels(words, tokenizer, wte) -> tuple:
 
 
 def label_matrix(word_labels, labels: dict):
-    """Rows (and their positions) whose lower-cased word has a label."""
     rows, valid = [], []
     for i, word in enumerate(word_labels):
         key = str(word).lower()

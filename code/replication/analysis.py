@@ -1,24 +1,6 @@
-"""The analysis chain of the paper on one matrix of semantic vectors Y (N x 768, float64).
-
-Every function takes Y and the occurrence metadata (country, year, month, post_aukus, doc_id, in row order) and returns
-a JSON-ready dictionary:
-
-* H1: MANOVA (Wilks' lambda, Rao's F approximation; Rencher and Christensen, eq. 6.10) on principal-component scores,
-  with the period split and the robustness settings;
-* H2: the subgroup difference-in-differences with a linear time trend, inference by the wild cluster bootstrap
-  (Cameron, Gelbach and Miller 2008; Rademacher weights by document; unrestricted residuals; centred tail p value;
-  one generator per component, seeds from :mod:`replication.seeds`); the 95% interval
-  ``b +/- quantile(|b* - b|, 0.95, method='linear')`` (not multiplicity-adjusted);
-* robustness models (year fixed effects with and without the Post main effect, a linear time trend, 2017+) and the
-  placebo models with fake cut-off years on the pre-signing rows;
-* the parallel-trends event study (US and UK, 2014-2024, base year 2021) with the joint Wald test of the pre-signing
-  UK x year terms under the full bootstrap covariance;
-* H3: nearest GPT-2 vocabulary words of each country's mean vector, before and after the signing;
-* Euclidean distances between the country mean vectors; the orientation of an own PC1 against the reference PC1.
-
-The bootstrap loops over clusters are vectorised (``weights[cluster_index]``); the random draws, their order and the
-arithmetic follow the original implementation. Test outcomes are reported as rejection or non-rejection at the stated
-level.
+"""The analysis chain on one matrix of semantic vectors Y: H1 MANOVA, H2 subgroup DiD with the wild cluster
+bootstrap and its robustness and placebo models, the parallel-trends event study, H3 neighbour words, country
+distances and the PC1 orientation check.
 """
 from __future__ import annotations
 
@@ -35,7 +17,7 @@ COUNTRIES = ('US', 'UK', 'AU')
 
 # =========================================================================== H1 MANOVA
 def compute_wilks_lambda_f(Y, labels):
-    """Wilks' lambda with Rao's F approximation (Rencher & Christensen eq 6.10)."""
+    """Wilks' lambda with Rao's F approximation (Rencher and Christensen eq. 6.10)."""
     unique = np.unique(labels)
     n_groups = len(unique)
     n_total = len(labels)
@@ -77,7 +59,6 @@ def compute_wilks_lambda_f(Y, labels):
 
 
 def residualize_year_fe(Y, years):
-    """Residuals of Y on year fixed effects (intercept plus one indicator per year after the first)."""
     unique_years = sorted(np.unique(years))
     n = len(years)
     X = np.ones((n, 1))
@@ -96,9 +77,6 @@ def _finite(p) -> bool:
 
 
 def h1_outcome(p, alpha: float = 0.05) -> dict:
-    """Label of a MANOVA outcome at the levels .001 and .05. Wilks / Rao F assumes independent
-    observations, which repeated occurrences within documents and years do not satisfy, so a rejection is not evidence
-    robust to that dependence."""
     if not _finite(p):
         return {'h1_joint_null_rejected': None, 'label': f'p 不可用：未检验{MANOVA_NULL}'}
     if p < alpha:
@@ -107,7 +85,6 @@ def h1_outcome(p, alpha: float = 0.05) -> dict:
 
 
 def manova_period_split(Y, meta: pd.DataFrame, n_pc: int | None = None, pca=None) -> dict:
-    """The period-split MANOVA: tests 1-6 with the labels and structure of the original analysis."""
     n_pc = setting('manova')['n_pc'] if n_pc is None else n_pc
     country = meta['country'].to_numpy()
     years = meta['year'].to_numpy()
@@ -156,7 +133,6 @@ def manova_period_split(Y, meta: pd.DataFrame, n_pc: int | None = None, pca=None
 
 
 def h1_summary(Y, meta, pca88=None) -> dict:
-    """Test 6 at k=88 and at the k99 rule (k from a PCA fitted to all components needed)."""
     pca88 = pca88 or fit_pca(Y, 88)
     base = manova_period_split(Y, meta, 88, pca88)
     full = fit_pca(Y, min(Y.shape))
@@ -168,7 +144,6 @@ def h1_summary(Y, meta, pca88=None) -> dict:
 
 
 def manova_pc_robustness(Y, meta, n_pcs=(3, 5, 10, 20, 30, 50, 70, 88, 99)) -> dict:
-    """Three-country MANOVA on PCA-k fitted on all rows, k in ``n_pcs``."""
     country = meta['country'].to_numpy()
     out = []
     for k in n_pcs:
@@ -180,9 +155,6 @@ def manova_pc_robustness(Y, meta, n_pcs=(3, 5, 10, 20, 30, 50, 70, 88, 99)) -> d
 
 
 def h1_test6_pc_robustness(Y, meta, n_pcs=(3, 5, 10, 20, 30, 50, 70, 88, 99)) -> dict:
-    """Principal-component robustness of H1 on its own sample: test 6 (pre-signing US / UK rows from 2014) on the
-    scores of a PCA-k fitted on all rows (as in the main MANOVA), Wilks' lambda with Rao's F, k in ``n_pcs``.
-    (:func:`manova_pc_robustness` is the three-country full-sample MANOVA over the same grid.)"""
     t6 = setting('manova')['test6']
     country = meta['country'].to_numpy()
     mask = ((~meta['post_aukus'].to_numpy().astype(bool)) & np.isin(country, t6['countries'])
@@ -200,7 +172,6 @@ def h1_test6_pc_robustness(Y, meta, n_pcs=(3, 5, 10, 20, 30, 50, 70, 88, 99)) ->
 
 
 def manova_time_robustness(Y, meta, pca88=None) -> dict:
-    """Three-country MANOVA on PCA-88: full sample and 2017+, raw and year-residualised."""
     pca88 = pca88 or fit_pca(Y, 88)
     S = pca88.transform(Y)
     country, years = meta['country'].to_numpy(), meta['year'].to_numpy()
@@ -217,13 +188,12 @@ def manova_time_robustness(Y, meta, pca88=None) -> dict:
 
 # =========================================================================== bootstrap core
 def cluster_index(clusters):
-    """Sorted unique clusters (numpy.unique) and each row's position among them."""
     unique, inverse = np.unique(clusters, return_inverse=True)
     return unique, inverse.astype(np.int64)
 
 
 def wcb_interval(beta, bootstrap_betas, level=None, method=None):
-    """b +/- Q_level(|b* - b|) with numpy.quantile(method='linear'); not multiplicity-adjusted."""
+    """b +/- Q_level(|b* - b|), numpy.quantile(method='linear')."""
     params = setting('wcb')
     level = params['interval_level'] if level is None else level
     method = params['quantile_method'] if method is None else method
@@ -232,9 +202,7 @@ def wcb_interval(beta, bootstrap_betas, level=None, method=None):
 
 
 def wcb_v1_main_bootstrap(X, y, clusters, n_bootstrap=seeds.WCB_DRAWS, seed=seeds.WCB_SEED_BASE) -> dict:
-    """Wild cluster bootstrap of the main model (Rademacher weights per document, unrestricted residuals; the
-    ``RandomState`` draws of the original implementation)."""
-    rs = np.random.RandomState(seed)  # == np.random.seed(seed) + np.random.choice (global RNG of the original)
+    rs = np.random.RandomState(seed)  # as in the original script
     n_samples, n_params = X.shape
     unique, inverse = cluster_index(clusters)
     n_clusters = len(unique)
@@ -263,7 +231,6 @@ def wcb_v1_main_bootstrap(X, y, clusters, n_bootstrap=seeds.WCB_DRAWS, seed=seed
 
 
 def wcb_robustness_bootstrap(X, y, clusters, n_bootstrap=seeds.WCB_DRAWS, seed=seeds.WCB_SEED_BASE) -> dict:
-    """Wild cluster bootstrap of the robustness models (normal equations with ``inv``; ``RandomState`` draws)."""
     n, k = X.shape
     XtX = X.T @ X
     XtX_inv = np.linalg.inv(XtX)
@@ -297,7 +264,7 @@ def wcb_robustness_bootstrap(X, y, clusters, n_bootstrap=seeds.WCB_DRAWS, seed=s
 
 # =========================================================================== H2 main (WCB)
 def wcb_features(meta: pd.DataFrame):
-    """The main H2 design: intercept, UK, AU, linear time trend, Post, UK x Post, AU x Post."""
+    """intercept, UK, AU, linear time trend, Post, UK x Post, AU x Post."""
     uk = (meta['country'] == 'UK').astype(float).to_numpy()
     au = (meta['country'] == 'AU').astype(float).to_numpy()
     time_var = (meta['year'] - setting('wcb')['trend_origin_year']).astype(float).to_numpy()
@@ -308,7 +275,6 @@ def wcb_features(meta: pd.DataFrame):
 
 
 def h2_wcb_main(pc_scores3, meta, explained_variance3) -> dict:
-    """The main H2 model with the wild cluster bootstrap, on precomputed PCA-3 scores."""
     params = setting('wcb')
     X, names = wcb_features(meta)
     clusters = meta['doc_id'].to_numpy()
@@ -358,9 +324,6 @@ def h2_wcb_main(pc_scores3, meta, explained_variance3) -> dict:
 
 # =========================================================================== descriptive re-run (alternative encoders)
 def wcb_uk_post_rerun(pc1_scores, meta, n_bootstrap: int | None = None, seed: int | None = None) -> dict:
-    """The descriptive re-run of the PC1 UK x Post WCB (the main specification of :func:`h2_wcb_main`, same
-    features, clusters and centred tail rule) with its own seed and B; p = (k + 1) / (B + 1), k = #{|b* - b| >= |b|}.
-    Descriptive only: it never replaces the primary p (B = 1000, seeds 42/43/44)."""
     params = setting('cross_encoder_reporting')
     B = params['rerun_B'] if n_bootstrap is None else n_bootstrap
     seed = params['rerun_seed'] if seed is None else seed
@@ -369,19 +332,16 @@ def wcb_uk_post_rerun(pc1_scores, meta, n_bootstrap: int | None = None, seed: in
     j = names.index('UK_x_post')
     k = int(np.sum(np.abs(r['bootstrap_betas'][:, j] - r['beta'][j]) >= np.abs(r['beta'][j])))
     return {'coef': float(r['beta'][j]), 'k': k, 'B': int(B), 'seed': int(seed), 'p': (k + 1) / (B + 1),
-            'se_bootstrap': float(r['se_bootstrap'][j]), 'rule': '(k + 1) / (B + 1); descriptive, never the primary p'}
+            'se_bootstrap': float(r['se_bootstrap'][j]), 'rule': '(k + 1) / (B + 1); descriptive'}
 
 
 def pre_signing_sd(pc1_scores, meta) -> dict:
-    """The SD (ddof = 1) of the PC1 scores of the pre-signing rows (post_aukus = 0)."""
     pre = (meta['post_aukus'].to_numpy().astype(int) == 0)
     values = np.asarray(pc1_scores, dtype=np.float64)[pre]
     return {'sd': float(np.std(values, ddof=1)), 'rows': int(pre.sum()), 'ddof': 1}
 
 
 def rerun_descriptive(own_pc1, same_axis_pc1, meta) -> dict:
-    """Both family members of one analysis (own-PCA PC1 and reference-axis PC1): the descriptive re-run and the
-    pre-signing SD of the scores. Computed on every E1-E4 analysis, unconditionally, alongside the primary WCB."""
     return {'rule': 'descriptive re-run (every alternative encoder, unconditional) and the pre-signing PC1 SD '
                     '(ddof = 1) on the same axis; neither changes the primary readings',
             'rerun': {'same_procedure_PC1': wcb_uk_post_rerun(own_pc1, meta),
@@ -392,15 +352,11 @@ def rerun_descriptive(own_pc1, same_axis_pc1, meta) -> dict:
 
 # =========================================================================== outcome labels
 def base_year_post_rows(df: pd.DataFrame, base_year: int) -> dict:
-    """Rows of the base year already coded post-AUKUS (month-level Post), per country of the estimation sample."""
     m = (df['year'] == base_year) & (df['post_aukus'].astype(int) == 1)
     return {str(c): int(n) for c, n in df.loc[m, 'country'].value_counts().sort_index().items()}
 
 
 def pretrend_outcome(p, base_year: int, post_rows: dict, alpha: float = 0.05) -> dict:
-    """Label of the joint pre-period Wald test: rejection iff p <= .05. The base year is a whole
-    calendar year, so it holds post-signing months when ``post_rows`` is non-empty; not rejecting is no proof of
-    parallel trends (low power; Roth 2022)."""
     total = sum(post_rows.values())
     base = (f'基准年 {base_year} 含签署后月份（' + '、'.join(f'{c} {n}' for c, n in post_rows.items()) + ' 行）'
             if total else f'基准年 {base_year} 不含签署后月份')
@@ -414,7 +370,6 @@ def pretrend_outcome(p, base_year: int, post_rows: dict, alpha: float = 0.05) ->
 
 
 def placebo_outcome(p, alpha: float = 0.05) -> dict:
-    """Label of a placebo UK/AU x fake-Post test: rejection iff bootstrap p <= .05."""
     if not _finite(p):
         return {'null_rejected': None, 'label': '安慰剂 p 不可用'}
     return ({'null_rejected': False, 'label': '安慰剂未拒绝（p > .05）'} if p > alpha
@@ -432,8 +387,6 @@ def build_main_model(df):
 
 
 def build_year_fe_model(df, with_post: bool = False):
-    """Year fixed-effects model: ``with_post=False`` as in the original specification (Post main effect omitted);
-    ``with_post=True`` with the Post main effect."""
     D_UK = (df['country'] == 'UK').astype(float).to_numpy()
     D_AU = (df['country'] == 'AU').astype(float).to_numpy()
     post = df['post_aukus'].astype(float).to_numpy()
@@ -460,7 +413,7 @@ def build_time_trend_model(df):
 
 
 def build_placebo_model(df, fake_cutoff_year):
-    """Placebo design: pre-AUKUS rows only, fake_post = year >= cutoff."""
+    """Pre-AUKUS rows only, fake_post = year >= cutoff."""
     pre_df = df[df['post_aukus'] == 0].copy()
     pre_df['fake_post'] = (pre_df['year'] >= fake_cutoff_year).astype(float)
     D_UK = (pre_df['country'] == 'UK').astype(float).to_numpy()
@@ -474,8 +427,6 @@ def build_placebo_model(df, fake_cutoff_year):
 def run_model_bootstrap(X, pc_scores, clusters, feature_names, model_name, n_bootstrap=seeds.WCB_DRAWS,
                         seed=seeds.WCB_SEED_BASE,
                         seed_step: int = 1) -> dict:
-    """Wild cluster bootstrap of one model on each PC (seed ``seed + pc`` at ``seed_step=1``) and the 95% intervals
-    under ``intervals_95``."""
     results = {'model_name': model_name, 'feature_names': feature_names}
     intervals = {}
     for pc_i in range(3):
@@ -496,8 +447,6 @@ def run_model_bootstrap(X, pc_scores, clusters, feature_names, model_name, n_boo
 
 def cluster_robust_wald_test(X, y, clusters, test_indices, n_bootstrap=seeds.WCB_DRAWS,
                              seed=seeds.EVENT_STUDY_WALD_SEED) -> dict:
-    """Joint Wald test of the coefficients ``test_indices``: bootstrap covariance (Rademacher weights per cluster) and
-    OLS covariance, chi-square reference."""
     n, k = X.shape
     XtX_inv = np.linalg.inv(X.T @ X)
     beta_hat = XtX_inv @ (X.T @ y)
@@ -525,8 +474,6 @@ def cluster_robust_wald_test(X, y, clusters, test_indices, n_bootstrap=seeds.WCB
 
 def run_event_study_with_proper_wald(df, pc_scores, base_year=2021, min_year=2017, max_year=2024,
                                      n_bootstrap=seeds.WCB_DRAWS, seed=seeds.EVENT_STUDY_WALD_SEED) -> dict:
-    """Event study of the robustness section with the joint Wald test (three countries, 2017-2024; one seed for all
-    PCs)."""
     mask = (df['year'] >= min_year) & (df['year'] <= max_year)
     df_f = df[mask]
     pc_f = pc_scores[mask.to_numpy()]
@@ -578,15 +525,13 @@ def run_event_study_with_proper_wald(df, pc_scores, base_year=2021, min_year=201
 
 
 def did_robustness(pc_scores3, meta, explained_variance3) -> dict:
-    """Robustness models, including year fixed effects with and without the Post main effect.
-    Bootstrap seeds are 42, 43 and 44 for PC1, PC2 and PC3."""
     params = setting('did_robustness')
     N_BOOT, SEED = setting('wcb')['n_bootstrap'], setting('wcb')['seed_base']
     ES_SEED = setting('did_robustness')['event_study']['seed']
     step = 1
     df = meta.reset_index(drop=True)
     clusters = df['doc_id'].to_numpy()
-    out = {'description': 'Comprehensive DID Robustness Analysis', 'n_total': len(df),
+    out = {'description': 'DID robustness models', 'n_total': len(df),
            'n_clusters': int(df['doc_id'].nunique()),
            'pca_variance': {f'PC{i + 1}': float(explained_variance3[i]) for i in range(3)}}
     X1, n1 = build_main_model(df)
@@ -647,10 +592,6 @@ def did_robustness(pc_scores3, meta, explained_variance3) -> dict:
 
 
 def placebo_with_trend(pc_scores3, meta) -> dict:
-    """The placebo as the main model with a fake cut: pre-signing rows only (all countries, all years), fake_post =
-    year >= cut for the placebo years, regressors constant, D_UK, D_AU, t = year - trend origin, fake_post, D_UK x
-    fake_post, D_AU x fake_post; the wild cluster bootstrap of the robustness models (seed 42 + PC index). Table 6
-    reports the placebo without the trend (:func:`build_placebo_model`)."""
     N_BOOT, SEED = setting('wcb')['n_bootstrap'], setting('wcb')['seed_base']
     df = meta.reset_index(drop=True)
     rows = (df['post_aukus'] == 0).to_numpy()
@@ -667,8 +608,6 @@ def placebo_with_trend(pc_scores3, meta) -> dict:
 
 # =========================================================================== parallel trends (paper)
 def parallel_trends_paper(pc_scores3, meta, explained_variance3) -> dict:
-    """The parallel-trends event study of the paper (US and UK; years and base year from the parameters) with the
-    joint Wald test of the pre-signing UK x year terms under the full bootstrap covariance."""
     params = setting('parallel_trends')
     base_year, min_year, max_year = params['base_year'], params['min_year'], params['max_year']
     mask = ((meta['year'] >= min_year) & (meta['year'] <= max_year) & (meta['country'].isin(['US', 'UK']))).to_numpy()
@@ -737,7 +676,6 @@ def parallel_trends_paper(pc_scores3, meta, explained_variance3) -> dict:
 
 # =========================================================================== H3
 def filter_vocabulary(vocab: dict):
-    """Vocabulary filter of the nearest-neighbour analysis (tokens sorted by id: only exact ties can move)."""
     stats_ = {'total_vocab': len(vocab), 'special_tokens_removed': 0, 'non_G_prefix_removed': 0,
               'non_alpha_removed': 0, 'single_char_removed': 0, 'kept': 0}
     filtered = []
@@ -772,7 +710,6 @@ def country_means(Y, meta, mask):
 
 
 def find_nearest_neighbors(country_mean, embeddings, filtered_tokens, top_k=30):
-    """The top-k cosine neighbours of a country mean vector (stable sort; ties reported)."""
     from sklearn.metrics.pairwise import cosine_similarity
     token_ids = [t[1] for t in filtered_tokens]
     sims = cosine_similarity(country_mean.reshape(1, -1), embeddings[token_ids])[0]
@@ -792,7 +729,6 @@ def find_nearest_neighbors(country_mean, embeddings, filtered_tokens, top_k=30):
 
 
 def analyze_common_unique(results_by_country, top_n=15):
-    """Words in the top n of all three countries and words in the top n of one country only."""
     word_sets = {c: set(r['word'] for r in res[:top_n]) for c, res in results_by_country.items()}
     all_c = list(word_sets)
     if len(all_c) < 3:
@@ -811,7 +747,6 @@ def analyze_common_unique(results_by_country, top_n=15):
 
 
 def h3_nearest_neighbors(Y, meta, embeddings, vocab) -> dict:
-    """H3: the nearest GPT-2 vocabulary words of each country's mean vector, before and after the signing; no PCA."""
     params = setting('h3')
     filtered, fstats = filter_vocabulary(vocab)
     post = meta['post_aukus'].to_numpy().astype(bool)
@@ -853,7 +788,6 @@ def h3_nearest_neighbors(Y, meta, embeddings, vocab) -> dict:
 
 
 def did_h3_distances(Y, meta) -> dict:
-    """Euclidean distances between the country mean vectors, before and after the signing."""
     post = meta['post_aukus'].to_numpy().astype(bool)
     out = {}
     for label, mask in (('pre', ~post), ('post', post)):
@@ -873,7 +807,6 @@ def did_h3_distances(Y, meta) -> dict:
 
 # =========================================================================== same-axis / orientation
 def orientation(own_components, reference_components) -> dict:
-    """Own PC1 loading vs reconstructed reference PC1 loading: cosine, sign, thresholds."""
     params = setting('orientation')
     own = np.asarray(own_components[0], dtype=np.float64)
     ref = np.asarray(reference_components[0], dtype=np.float64)
@@ -881,12 +814,11 @@ def orientation(own_components, reference_components) -> dict:
     return {'cos_pc1': cos, 'abs_cos_pc1': abs(cos), 'sign': 1 if cos >= 0 else -1,
             'comparable_at_0.30': abs(cos) >= params['primary_threshold'],
             'descriptive': {str(t): abs(cos) >= t for t in params['descriptive_thresholds']},
-            'rule': 'orient own PC1 by the sign of its inner product with the reference PC1 loading; never by '
-                    'regression coefficients; |cos| < 0.30 -> "direction not comparable" (p and Holm membership kept)'}
+            'rule': 'own PC1 oriented by the sign of its inner product with the reference PC1 loading; '
+                    '|cos| < 0.30 -> "direction not comparable" (p and Holm membership kept)'}
 
 
 def h2_models(Y, meta, pca3=None) -> dict:
-    """PCA-3 (all rows, 'full') + WCB main + did robustness + paper parallel trends."""
     pca3 = pca3 or fit_pca(Y, 3)
     S3 = pca3.transform(Y)
     ev = pca3.explained_variance_ratio_

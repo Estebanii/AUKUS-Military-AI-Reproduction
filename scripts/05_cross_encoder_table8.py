@@ -1,12 +1,7 @@
 #!/usr/bin/env python3
-"""Table 8: the four alternative encoders on the 37,808 common-support occurrences.
-
-For each alternative encoder the full analysis chain (as for the baseline, plus the reference-axis model, the
-orientation of its own PC1 and the descriptive B = 9,999 re-run); then the two Holm families, the readings,
-the Monte Carlo precision, the effect consistency, the baseline encoder on the same rows and the linear CKA; then the
-same-axis robustness (cross-encoder test, Table 8): placebos and the pre-signing Wald on the reference axes and on each
-encoder's own axes. Writes results/alternatives/<encoder>/*.json, results/cross_encoder/*.json and
-results/tables/table8_*.csv.
+"""Table 8: the analysis chain for each alternative encoder on the common-support rows, the Holm families, the
+baseline encoder on the same rows, linear CKA and the same-axis robustness. Writes results/alternatives/,
+results/cross_encoder/ and results/tables/table8_*.csv.
 """
 import _common  # noqa: F401
 

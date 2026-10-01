@@ -1,28 +1,5 @@
-"""The sensitivity covariance estimators of the descriptive event study.
-
-The event study is saturated in country x event period: by the normal equations each coefficient's monthly scores
-sum to zero within its period, so the monthly-score HAC is biased towards zero (a fixed-b problem with
-T_tau = 12, 8 or 4 months). The event-study coefficients are therefore reported descriptively; their Wald, TOST
-and HonestDiD are not valid inference and appear only as sensitivity under the estimators below, each labelled
-with its assumption:
-
-* ``hac_bartlett_iid_exact`` -- the monthly-score Bartlett HAC (b = 6: s_t = sum_{i in t} w_i x_i e_i,
-  V = Q^-1 [sum k_b(t - u) s_t s_u'] Q^-1) with each contrast's variance divided by its design-exact expectation
-  under iid errors, kappa_c = Var_iid(c'b) / E_iid[c'V c]. Marginal variances are unbiased under iid only; the joint
-  matrix is D^1/2 S D^1/2 (D = diag kappa), which keeps the HAC correlations and does not correct them, and the
-  rebased HonestDiD covariance is not guaranteed unbiased either. Normal reference; joint test chi-square(q).
-* ``cr2_month`` -- month-clustered CR2 (Bell-McCaffrey 2002; clusters = calendar months across every country;
-  A_t = (I - H_tt)^{+1/2}, weights as precision), contrast-specific Bell-McCaffrey / Imbens-Kolesar degrees of
-  freedom under the iid working model (nu = (tr Gamma)^2 / tr Gamma^2, Gamma = G'G) and the joint small-sample HTZ
-  test (Pustejovsky-Tipton 2018: Hotelling T^2 with a Wishart approximation of eta degrees of freedom;
-  F = (eta - q + 1) / (eta q) T^2 ~ F(q, eta - q + 1)). Assumes independence across months (within-month dependence
-  across countries, documents and occurrences is allowed).
-
-Interface (:func:`prepare`): ``prepare(spec, X, month, w, C)`` -> an estimator with ``contrast_cov(E)`` (the k x k
-covariance of C b for every column of the residual matrix E, shape (columns, k, k)), ``df`` (per-contrast degrees of
-freedom, or None for the normal reference), ``critical(level)`` (per-contrast two-sided critical values),
-``joint(idx, b, S)`` (the joint test of the contrasts ``idx`` with the covariance block S), ``label`` and
-``assumption``. Everything except ``contrast_cov`` depends on the design only (no outcome).
+"""Covariance estimators for the sensitivity checks of the event study: an iid-corrected Bartlett HAC on monthly
+scores, and month-clustered CR2 with Bell-McCaffrey degrees of freedom and the HTZ joint test.
 """
 from __future__ import annotations
 
@@ -43,7 +20,6 @@ def _sorted_months(month):
 
 
 def _inv_sqrt_psd(M: np.ndarray, tol: float = 1e-10) -> tuple:
-    """(M^{+1/2}, number of eigenvalues treated as zero) of a symmetric PSD matrix."""
     vals, vecs = np.linalg.eigh((M + M.T) / 2)
     top = max(float(vals.max()), 1e-300)
     keep = vals > tol * top
@@ -52,7 +28,6 @@ def _inv_sqrt_psd(M: np.ndarray, tol: float = 1e-10) -> tuple:
 
 
 def chi2_joint(b: np.ndarray, S: np.ndarray, scale: float | None = None) -> dict:
-    """Wald chi-square(q) with the singular rule (min eigenvalue <= 1e-12 x max, or max <= 1e-12 x ``scale``)."""
     q = len(b)
     eig = np.linalg.eigvalsh((S + S.T) / 2)
     if eig.min() <= eig.max() * 1e-12 or (scale is not None and eig.max() <= SINGULAR_REL_TOL * scale):
@@ -63,7 +38,7 @@ def chi2_joint(b: np.ndarray, S: np.ndarray, scale: float | None = None) -> dict
 
 
 class HacIidExact:
-    """The design-exact iid-corrected Bartlett HAC (sensitivity; see the module docstring)."""
+    """Iid-corrected Bartlett HAC on monthly scores (sensitivity only)."""
 
     name = 'hac_bartlett_iid_exact'
     label = '设计精确校正的 Bartlett HAC（b = 6）'
@@ -125,7 +100,7 @@ class HacIidExact:
 
 
 class Cr2Month:
-    """Month-clustered CR2 with Bell-McCaffrey / Imbens-Kolesar degrees of freedom and the HTZ joint test."""
+    """Month-clustered CR2 with Bell-McCaffrey degrees of freedom and the HTZ joint test."""
 
     name = 'cr2_month'
     label = '按月聚类的 CR2（Bell–McCaffrey/Imbens–Kolesár 自由度，HTZ 联合检验）'
@@ -166,7 +141,7 @@ class Cr2Month:
         self._eta = {}
 
     def gamma(self, a: int, b: int) -> np.ndarray:
-        """Gamma_ab = G_a' G_b (T x T): the working-model inner products of the cluster terms of contrasts a and b."""
+        """Gamma_ab = G_a' G_b (T x T)."""
         return np.diag(self.ZZ[:, a, b]) - self.F[:, a, :] @ self.Q_inv @ self.F[:, b, :].T
 
     def record(self) -> dict:
@@ -187,7 +162,6 @@ class Cr2Month:
                          for d in self.df])
 
     def eta(self, idx) -> float:
-        """HTZ degrees of freedom of the contrasts ``idx`` (design only; cached)."""
         key = tuple(int(i) for i in idx)
         if key not in self._eta:
             q = len(key)
@@ -220,7 +194,6 @@ class Cr2Month:
                 'reference': 'F(q, eta - q + 1); CR2 clustered by calendar month (cross-month independence)'}
 
     def joint_p(self, idx, T2: np.ndarray) -> np.ndarray:
-        """Vectorised HTZ p values of Hotelling T^2 values (simulation)."""
         q = len(idx)
         eta = self.eta(idx)
         df2 = eta - q + 1
@@ -233,13 +206,11 @@ ESTIMATORS = {HacIidExact.name: HacIidExact, Cr2Month.name: Cr2Month}
 
 
 def prepare(spec: dict, X, month, w, C):
-    """The estimator named in ``spec`` (an entry of ``external_params('event_study')['sensitivity_estimators']``)."""
     params = {k: v for k, v in spec.items() if k != 'name'}
     return ESTIMATORS[spec['name']](X, month, w, C, **params)
 
 
 def joint_p_vector(est_obj, idx, T2: np.ndarray) -> np.ndarray:
-    """Vectorised joint-test p values of Wald / Hotelling T^2 values for either estimator (simulation)."""
     if hasattr(est_obj, 'joint_p'):
         return est_obj.joint_p(idx, T2)
     return stats.chi2.sf(np.asarray(T2, float), len(idx))

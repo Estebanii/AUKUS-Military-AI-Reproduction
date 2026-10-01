@@ -1,16 +1,5 @@
-"""The comparison across encoders (Table 8): four alternative encoders (ModernBERT-large, RoBERTa-large,
-Ettin-encoder-1b, DeBERTa-v2-xlarge) on the 37,808 common-support occurrences.
-
-* Same procedure: each encoder's own PCA; its PC1 is oriented by the sign of the inner product of its loading with
-  the reference PC1 loading (never by a coefficient); |cos| < 0.30 means "direction not comparable" (p and family
-  membership kept).
-* Same axis: the encoder's Y projected on the reference axes (the PCA-88 of the original submission's vectors,
-  ``data.original_vectors``; not of the re-encoded baseline).
-* Two Holm families over the four encoders (PC1 UK x Post, wild cluster bootstrap p, B = 1,000); read separately.
-* Reporting additions (descriptive, never changing a reading): the Monte Carlo SE of each bootstrap p and a boundary
-  flag when p +/- 2 se_MC changes the Holm reading; a B = 9,999 re-run of every member; whether each 95% interval
-  contains the original submission's PC1 UK x Post coefficient; the standardized effect; the baseline encoder on the
-  same rows; linear CKA (Kornblith et al. 2019) between the encoders' Y.
+"""Table 8: the four alternative encoders on the common-support rows, the same-procedure and same-axis Holm
+families, the Monte Carlo precision of the bootstrap p values and linear CKA between encoders.
 """
 from __future__ import annotations
 
@@ -26,7 +15,7 @@ FAMILY_KEYS = {'same_procedure': 'same_procedure_PC1', 'same_axis': 'same_axis_P
 
 
 def linear_cka(X, Y) -> float:
-    """Linear CKA (Kornblith et al. 2019) of two row-aligned matrices (feature-space form)."""
+    """Linear CKA (Kornblith et al. 2019)."""
     X = np.asarray(X, np.float64) - np.asarray(X, np.float64).mean(axis=0)
     Y = np.asarray(Y, np.float64) - np.asarray(Y, np.float64).mean(axis=0)
     xy = np.linalg.norm(X.T @ Y) ** 2
@@ -34,7 +23,6 @@ def linear_cka(X, Y) -> float:
 
 
 def holm(pvalues: dict) -> dict:
-    """Holm step-down adjusted p values (family = the keys)."""
     items = sorted(pvalues.items(), key=lambda kv: (kv[1], kv[0]))
     m, running, out = len(items), 0.0, {}
     for i, (name, p) in enumerate(items):
@@ -44,7 +32,6 @@ def holm(pvalues: dict) -> dict:
 
 
 def family(raw: dict) -> dict:
-    """Raw p of the four members and their Holm-adjusted p (the family size is 4)."""
     members = {e: float(raw[e]) for e in ALTERNATIVES}
     return {'raw': members, 'holm': holm(members), 'size': len(members)}
 
@@ -75,9 +62,6 @@ def _holm_text(family_name: str, rejected: bool, alpha: float) -> str:
 
 def readings(rows: dict, f1: dict, f2: dict, v1_sign: int, alpha: float = 0.05, mc: dict | None = None,
              effects: dict | None = None) -> dict:
-    """The pre-stated conditions and their labels. Same procedure: direction comparable, oriented PC1
-    UK x Post of the original sign, Holm p < alpha. Same axis: reference-axis PC1 UK x Post of the original sign,
-    Holm p < alpha. The two families are read separately."""
     out = {}
     for e in ALTERNATIVES:
         r = rows[e]
@@ -104,18 +88,15 @@ def readings(rows: dict, f1: dict, f2: dict, v1_sign: int, alpha: float = 0.05, 
 
 
 def mc_se(p: float, B: int) -> float:
-    """Binomial Monte Carlo standard error of a bootstrap p from B draws."""
+    """sqrt(p (1 - p) / B)."""
     return float(np.sqrt(p * (1 - p) / B))
 
 
 def p_display(p: float, B: int) -> str:
-    """A centred-tail p of 0 is shown as "< 0.001" (< 1/B at B = 1000), never as an exact 0."""
     return params('cross_encoder_reporting')['p_zero_display'] if p == 0 else f'{p:.3f}'
 
 
 def mc_precision(raw: dict, alpha: float = 0.05, B: int | None = None, k: float | None = None) -> dict:
-    """Per member: se_MC = sqrt(p(1 - p)/B), the tail count, and the Holm reading recomputed with its own p replaced by
-    p - k*se_MC and p + k*se_MC (clipped to [0, 1]); a change of reading adds the boundary flag."""
     p_ = params('cross_encoder_reporting')
     B = p_['mc_B'] if B is None else B
     k = p_['se_multiplier'] if k is None else k
@@ -138,8 +119,6 @@ def mc_precision(raw: dict, alpha: float = 0.05, B: int | None = None, k: float 
 
 def effect_consistency(coef: float, interval, pre_sd: float | None, v1_coef: float,
                        holm_rejected: bool | None = None) -> dict:
-    """Whether the 95% interval contains the original PC1 UK x Post coefficient and excludes 0, and the standardized
-    effect coef / SD(pre-signing PC1 scores on the same axis, ddof = 1)."""
     lo, hi = sorted(float(v) for v in interval)
     contains = bool(lo <= v1_coef <= hi)
     reading = label_text('consistent_but_imprecise') if contains and holm_rejected is False else None
@@ -150,8 +129,6 @@ def effect_consistency(coef: float, interval, pre_sd: float | None, v1_coef: flo
 
 
 def reporting_section(rows: dict, f1: dict, f2: dict, alpha: float, v1_coef: float, baseline: dict) -> dict:
-    """Monte Carlo precision of every raw p, the descriptive re-run of all 8 members and the effect consistency, with
-    the baseline encoder on the same rows beside them."""
     mc = {'same_procedure': mc_precision({e: f1['raw'][e] for e in rows}, alpha),
           'same_axis': mc_precision({e: f2['raw'][e] for e in rows}, alpha)}
     rerun, effects = {'same_procedure': {}, 'same_axis': {}}, {'same_procedure': {}, 'same_axis': {}}
@@ -175,10 +152,6 @@ def reporting_section(rows: dict, f1: dict, f2: dict, alpha: float, v1_coef: flo
 
 
 def baseline_on_common_rows(U_t, U_a, anchor_words, labels: dict, rows, axes: dict, meta, v1_coef: float) -> dict:
-    """The baseline encoder computed the way the members are (reported only; not a family member): its A on all
-    anchors, Y of the common-support target rows, own PCA-3 of those rows (oriented by the reference PC1 loading) and
-    the reference axes; for PC1 UK x Post of each, the primary WCB (B = 1,000, seed 42) coefficient, p and 95%
-    interval, the descriptive re-run, the pre-signing SD and the effect consistency."""
     fit = fit_a(np.asarray(U_a), anchor_words, labels)
     rows = np.asarray(rows, np.int64)
     Y = transform(np.asarray(U_t)[rows], fit.A, fit.U_mean)

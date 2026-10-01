@@ -1,23 +1,10 @@
 #!/usr/bin/env python3
 """Check the recomputed results against every number printed in the quantitative part of the manuscript.
 
-For each of the items in ``expected/paper_numbers.csv`` (one row per printed number, with its location in the
-manuscript) the value is read from the results (or from the data bundle, a fixed parameter, or an expression over
-these), rounded as the manuscript rounds it (ROUND_HALF_UP on the shortest decimal representation, the printed number
-of decimals; percentages x 100) and compared with the printed number. Significance stars are checked against the
-bootstrap p value. Rules: ``round`` (the rounded value equals the printed one), ``p_floor`` (printed "<0.001": the
-value is below 0.001), ``threshold`` (a printed threshold equals the parameter), ``text`` (year-month and similar text
-equal), ``label`` (a printed label, not a computed number; listed, not tested).
-
-Every item is also compared with the full-precision reference value of the manuscript's own results ("exact" when
-identical to the last bit). In the pinned environment every recomputed item is exact; on another platform or BLAS the
-last digits may differ, which the display-precision test (PASS / FAIL) tolerates by construction.
-
-Usage: python compare.py [--results DIR] [--data DIR]. Writes results/compare/items.csv and
-results/compare/summary.csv; prints the run record of results/run_info.json (written by run_all.sh) first and one
-line per manuscript table, figure, footnote and text section; exit code 1 if any item FAILS, 2 if the run record is
-missing or its package commit (git HEAD, or the commit id in VERSION when there is no .git), code fingerprint or data
-manifest differs from the current copy of the package.
+Each row of expected/paper_numbers.csv names a printed number, where it is read from and how it is rounded; the
+recomputed value is rounded the same way and compared, and the full-precision reference value is compared as well.
+Writes results/compare/items.csv and summary.csv. Exit code 1 if any item fails, 2 if the run record is missing or
+does not match this copy of the package.
 """
 from __future__ import annotations
 
@@ -50,8 +37,6 @@ def resolve(obj, pointer: str):
 
 
 def param(dotted: str):
-    """A fixed parameter: 'section.key.index' of replication.params, or 'external:section.key' of the external-control
-    parameters."""
     if dotted.startswith('external:'):
         from replication.external.params import EXTERNAL_PARAMS as table
         dotted = dotted[len('external:'):]
@@ -69,7 +54,6 @@ def min_year_key(d: dict) -> int:
 
 
 def year_of_rank(coefficients: dict, years, rank: int) -> int:
-    """The year whose UK x year coefficient has the given rank (1 = largest) among ``years``."""
     ordered = sorted(years, key=lambda y: coefficients[f'UK_x_{y}']['coef'], reverse=True)
     return int(ordered[rank - 1])
 
@@ -87,7 +71,6 @@ TRANSFORMS = {
 
 
 def recompute(row: dict, results: Path, bundle: Path | None):
-    """The recomputed value of one item (before scaling)."""
     results = Path(results)
     bundle = Path(bundle) if bundle else None
 
@@ -133,7 +116,6 @@ def stars(p: float) -> str:
 
 
 def check(row: dict, value) -> tuple:
-    """(status, recomputed display, detail)."""
     rule, printed = row['rule'], row['printed_display']
     if rule == 'label':
         return 'LABEL', '', 'printed label, not a computed number'

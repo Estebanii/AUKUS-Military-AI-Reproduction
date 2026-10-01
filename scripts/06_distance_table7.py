@@ -1,11 +1,6 @@
 #!/usr/bin/env python3
-"""Table 7 and footnote 81: the change of the US-UK distance from before to after the signing.
-
-Baseline encoder: the main specification (own PCA-88, 2014-2025/11) and the reference PC1, PC1-3, first 88 axes, the
-full 768-dimensional space and (f) the full space on the original manuscript's own sample; alternative encoders: the
-first 88 reference axes. Pivot bootstrap over documents, B = 2,000, seed from replication.seeds. Hard checks against
-the H1 / H2 / neighbour-word results (scripts 02-05), which therefore run first.
-Writes results/distance/<encoder>.json, results/distance/summary.json and results/tables/table7_distance_change.csv.
+"""Table 7 and footnote 81: the change of the US-UK distance from before to after the signing (pivot bootstrap
+over documents). Needs scripts 02-05. Writes results/distance/ and results/tables/table7_distance_change.csv.
 """
 import _common  # noqa: F401
 

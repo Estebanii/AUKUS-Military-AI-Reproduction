@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Table 2 and the sample counts of Section IV.3: occurrences, documents and year-month span by country and period
-(pre-signing = year-month <= 2021-08; post = from 2021-09, month-level coding), the number of target terms, and the
-pre-signing Australian occurrences. Writes results/table2_sample.json and results/tables/table2_sample.csv."""
+"""Table 2 and the sample counts of Section IV.3 by country and period. Writes results/table2_sample.json and
+results/tables/table2_sample.csv.
+"""
 import _common  # noqa: F401
 
 import pandas as pd

@@ -1,16 +1,5 @@
-"""The sensitivity items (descriptive; raw month-block p values reported, never members of a test family).
-
-Each item is a :class:`replication.external.estimate.Spec` variant of the main M1 specification of its sample, estimated on
-every response column with the circular month-block bootstrap (same seed and draws per calendar):
-
-SG to 2023-12; donut (2021-09..2021-12 removed from data and calendar); day-level cut 2021-09-16 (Post, strata and
-the 2021-09 split all at the day); news + release genres only; fixed genre composition (pre-period shares per
-country; may change the estimand); document equal weight; concurrent events (SG documents 2021-08-15..2021-09-30
-related to cyber cooperation removed: title or content matching ``cyber``, case-insensitive; the removed documents
-are listed); M3 term FE; the 2017+ shrink window; the 2017-09+ common window (all four countries observed); without
-AU (AU also enters the common trend and year effects); SG + CA pooled (one control group, 2017-01..2025-11); without
-the cyber terms; block length L = 3 and 12. The cross-control comparison (SG vs CA) is read on the same window
-(S_SG 2017+ vs S_CA 2017+).
+"""The sensitivity items of the external-control analysis (alternative windows, cuts, weights, genres and
+samples; descriptive month-block p values).
 """
 from __future__ import annotations
 
@@ -24,7 +13,6 @@ from .params import external_params
 
 
 def concurrent_documents(docs: pd.DataFrame) -> pd.DataFrame:
-    """SG documents dated in the window whose title or content matches the cyber pattern."""
     s = external_params('sensitivity')['concurrent_sg']
     d = docs.loc[docs['country'].eq('SG')]
     date = d['publish_date'].astype(str)
@@ -35,7 +23,6 @@ def concurrent_documents(docs: pd.DataFrame) -> pd.DataFrame:
 
 
 def items(sample: str, concurrent_ids: tuple) -> dict:
-    """The specifications of one sample (SG or CA), keyed by item name."""
     s = external_params('sensitivity')
     w = external_params('windows')
     base = est.main_spec(sample)

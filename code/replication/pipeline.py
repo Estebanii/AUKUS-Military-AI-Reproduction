@@ -1,6 +1,5 @@
-"""The measurement pipeline: GPT-2 labels, the A matrix of each encoder, the semantic vectors Y, the reference axes and
-the full analysis chain of one Y. Intermediate arrays are cached under ``results/intermediate`` by
-``scripts/00_prepare.py`` and read by the other scripts.
+"""The measurement pipeline: GPT-2 labels, the A matrix of each encoder, the semantic vectors Y, the reference axes
+and the analysis chain of one Y. Intermediate arrays are cached under results/intermediate by scripts/00_prepare.py.
 """
 from __future__ import annotations
 
@@ -17,8 +16,6 @@ INTERMEDIATE = 'intermediate'
 
 # --------------------------------------------------------------------------- GPT-2 labels
 def gpt2_bundle() -> dict:
-    """GPT-2 tokenizer and input embeddings (pinned files, hash-verified), the labels of the 100 anchor words and the
-    anchor word of each of the 49,999 anchor occurrences (row order of every anchor encoding)."""
     source = labels_mod.resolve_gpt2(data.gpt2_dir())
     tokenizer, wte = labels_mod.load_gpt2(source)
     words_all = data.anchor_words()
@@ -36,15 +33,11 @@ def map_rows(cmap: pd.DataFrame, kind: str) -> pd.DataFrame:
 
 
 def common_rows(kind: str = 'targets') -> np.ndarray:
-    """Original row indices of the common-support rows (ascending)."""
     return map_rows(data.common_support_map(), kind)['orig_row_index'].to_numpy()
 
 
 # --------------------------------------------------------------------------- A and Y of one encoder
 def fit_encoder(encoder: str, bundle: dict) -> dict:
-    """A and Y of one encoder. Baseline: all 37,866 target and 49,999 anchor occurrences. Alternative encoders: the
-    common-support rows (37,808 targets, 49,999 anchors), strict A fit. Every encoding is checked to follow the row
-    order of the metadata (targets) and of the anchor occurrences (anchors)."""
     U_t, rows_t = data.encoding(encoder, 'targets')
     U_a, rows_a = data.encoding(encoder, 'anchors')
     meta = data.analysis_meta()
@@ -112,7 +105,6 @@ def load_axes() -> dict:
 
 
 def encoder_meta(encoder: str) -> pd.DataFrame:
-    """The occurrence metadata in the row order of the encoder's Y (baseline: all rows; others: common support)."""
     meta = data.analysis_meta()
     if encoder == data.BASELINE:
         return meta
@@ -120,8 +112,6 @@ def encoder_meta(encoder: str) -> pd.DataFrame:
 
 
 def analysis_table(encoder: str, Y, U_t=None) -> pd.DataFrame:
-    """The occurrence table of one encoder's analysis: corpus metadata (encoder row order), Y and optionally U (for the
-    external-control panel)."""
     table = data.occurrence_meta()
     if encoder != data.BASELINE:
         table = table.iloc[common_rows('targets')].reset_index(drop=True)
@@ -136,10 +126,6 @@ def analysis_table(encoder: str, Y, U_t=None) -> pd.DataFrame:
 
 # --------------------------------------------------------------------------- the analysis chain of one Y
 def run_analyses(Y, meta, bundle, axes: dict | None, rerun: bool = False) -> dict:
-    """The full chain on one Y: H1 (MANOVA, k = 88 and the 99% rule), PCA-k robustness, H2 (WCB main model, robustness
-    models, parallel trends), H3 neighbours, distances, and -- with the reference axes -- the same-axis WCB and the
-    orientation of the own PC1. ``rerun`` (alternative encoders): the descriptive B = 9,999 re-run of both PC1 UK x
-    Post members and the pre-signing PC1 SDs."""
     pca88 = pca.fit_pca(Y, 88)
     h1 = analysis.h1_summary(Y, meta, pca88)
     h2 = analysis.h2_models(Y, meta)

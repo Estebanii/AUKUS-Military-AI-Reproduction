@@ -1,7 +1,5 @@
-"""Fixed parameters of the main analysis (baseline encoder and the four alternative encoders).
-
-Seeds and resampling counts come from :mod:`replication.seeds`; nothing here is random. :func:`params` returns a deep
-copy of one section, so a caller can never change the parameters of another step.
+"""Fixed parameters of the main analysis (baseline and alternative encoders). Seeds come from replication.seeds;
+params returns a deep copy of one section.
 """
 from __future__ import annotations
 
@@ -9,9 +7,7 @@ import copy
 
 from . import seeds
 
-# GPT-2 (Radford et al. 2019) provides the label space of the embedding regression: the input embeddings of the anchor
-# words (labels of the A matrix) and the vocabulary of the neighbour-word analysis. The files are pinned by revision
-# and sha256 and verified before use.
+# GPT-2 label space (anchor-word input embeddings; neighbour-word vocabulary); files pinned by revision and sha256
 GPT2 = {
     'model_id': 'gpt2',
     'revision': '607a30d783dfa663caf39e06633721c8d4cfcd7e',
@@ -29,9 +25,8 @@ PARAMS = {
     # labels of the A matrix: mean of the GPT-2 input embeddings of each anchor word's sub-tokens (float32)
     'labels': {'source': 'gpt2 wte', 'aggregation': 'mean of bare-word sub-tokens', 'add_special_tokens': False,
                'dtype': 'float32', 'key': 'lower-case word', 'gpt2': GPT2},
-    # the A matrix: ridge regression of the centred labels on the whitened, centred encoder states with a Procrustes
-    # prior (Khodak et al. 2018; Rodriguez, Spirling and Stewart 2023). The prior is the rank-r part of the Procrustes
-    # solution, r = #{singular values > 1e-8 x the largest}; every step after the float32 encoder states is float64.
+    # A matrix: ridge regression with a rank-truncated Procrustes prior (Khodak et al. 2018; Rodriguez, Spirling and
+    # Stewart 2023)
     'a_matrix': {'lambda': 0.1, 'whiten': True, 'whiten_eps': 1e-6, 'procrustes_prior': True,
                  'rule': 'rank_truncated', 'a0_rank_rel_tol': 1e-8, 'y_formula': '(U - U_mean) @ A.T'},
     # principal components: full SVD, deterministic
@@ -62,7 +57,7 @@ PARAMS = {
                                    'Holm over 4',
                  'same_axis': 'alternative encoders, reference-axis PC1 UK x Post, Holm over 4',
                  'alpha': 0.05},
-    # alternative encoders: Monte Carlo precision of the bootstrap p values and the descriptive re-run
+    # alternative encoders: Monte Carlo precision and the descriptive re-run
     'cross_encoder_reporting': {'mc_B': seeds.WCB_DRAWS, 'se_multiplier': 2,
                                 'boundary_flag': '边界：对 bootstrap 抽样敏感', 'p_zero_display': '< 0.001',
                                 'rerun_seed': seeds.RERUN_SEED, 'rerun_B': seeds.RERUN_DRAWS,
@@ -73,5 +68,4 @@ PARAMS = {
 
 
 def params(section: str | None = None) -> dict:
-    """A deep copy of the parameters (or one section)."""
     return copy.deepcopy(PARAMS if section is None else PARAMS[section])

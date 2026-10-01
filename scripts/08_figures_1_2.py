@@ -1,12 +1,9 @@
 #!/usr/bin/env python3
-"""Figures 1 and 2: PCA (PC1 x PC2 by country and by period) and t-SNE of the semantic vectors.
+"""Figures 1 and 2: PCA and t-SNE scatter plots of the semantic vectors.
 
-As in the manuscript, both figures are drawn from the original semantic vectors (the vectors of the original
-submission, in the data bundle); ``--encoder deberta-v3-base`` draws them from the baseline re-encoding instead
-(needs script 00). The axis labels of Figure 1 print the PC1 / PC2 variance shares; compare.py checks them against this
-figure's own PCA (figures_1_2.json). No full-precision value of the published figure is archived; the baseline encoder's
-analysis PCA-3 (results/h2/meta.json) rounds to the same printed shares.
-Writes results/figures/figure1_pca.{png,pdf,csv}, figure2_tsne.{png,pdf,csv} and figures_1_2.json.
+Both are drawn from the original semantic vectors, as in the manuscript; --encoder deberta-v3-base draws them from
+the baseline re-encoding (needs script 00). Writes results/figures/figure1_pca.*, figure2_tsne.* and
+figures_1_2.json.
 """
 import _common  # noqa: F401
 

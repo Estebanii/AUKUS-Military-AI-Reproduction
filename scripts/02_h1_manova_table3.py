@@ -1,10 +1,6 @@
 #!/usr/bin/env python3
-"""H1 (Table 3, footnotes 72 and 78, and the alternative-encoder F values of Section V.2).
-
-Baseline encoder: MANOVA on PCA-88 scores (period split, test 6 = pre-signing US vs UK from 2014), the 99%-variance
-rule, the PCA-k robustness of test 6 (k = 3 ... 99; footnote 72), the PCA-k robustness of the three-country
-full-sample MANOVA and the time robustness. Alternative encoders:
-test 6 on their own PCA-88 of the common-support rows. Writes results/h1/<encoder>/{manova,h1,...}.json.
+"""H1 (Table 3, footnotes 72 and 78): MANOVA on PCA-88 scores, its PCA-k and time robustness, and test 6 for the
+alternative encoders. Writes results/h1/<encoder>/.
 """
 import _common  # noqa: F401
 

@@ -1,27 +1,5 @@
-"""The coverage / size simulation of the procedures actually used (fixed together with the MDE, before any
-estimate).
-
-Generic over scenarios and procedures (``external_params('simulation')``). For every sample (SG, CA) the real design is used --
-the rows of the sample's main M1 specification with their countries, calendar months, documents and weights; no
-outcome column is ever read -- and Y = e (every coefficient, slope and event contrast is 0), e drawn per frozen
-scenario (idiosyncratic, document, country-month AR(1), common-month AR(1) components). One draw of e per batch is
-shared by every procedure:
-
-* ``M1`` and ``slope`` / ``slope_L3`` / ``slope_L12`` (bootstrap procedures): the full month-block procedure of
-  :func:`replication.external.estimate.fit_spec` with the real draws (B = 9,999, seed 20260928, the same block calendar,
-  replacement draws and the <= 1% target-estimability rule): the centred two-sided +1 p value and the symmetric
-  order-statistic intervals; per estimand coverage of the 95% and 90% intervals and the size of the 5% test. The
-  per-draw Gram solutions depend on the design only and are computed once (draws with an ambiguous rank gap use the
-  pseudo-inverse of the draw's Gram matrix; the real procedure refits them on the materialised rows);
-* ``es:<estimator>`` (fixed-design procedures; :mod:`replication.external.escov`): the event-study sensitivity estimators; per
-  event coefficient coverage of the 95% / 90% intervals (normal or Student-t by the estimator) and the size of each
-  family's pre-period joint test.
-
-Judgement (prespecified simulation acceptance criteria, one-sided 95% Clopper-Pearson bounds): coverage 95% >= .93 and 90% >= .88,
-size <= .06; clearly outside = 失败, straddling = 未定, clearly inside = 通过. Every scenario is reported; 通过 is not a
-proof of validity. Descriptive only (a zero-effect simulation cannot validate them): the TOST pass rate with one pre
-coefficient on the equivalence boundary, and the HonestDiD robust-interval coverage of the target under a deviation
-path on the Delta^RM(M-bar) boundary.
+"""Coverage and size simulation of the inference procedures on the real design (Y = e under five error
+scenarios; no outcome is read).
 """
 from __future__ import annotations
 
@@ -44,7 +22,7 @@ FAMILIES = eventstudy.FAMILIES
 
 # =========================================================================== judgement
 def cp_bounds(x: int, n: int, level: float = 0.95) -> tuple:
-    """One-sided ``level`` Clopper-Pearson (lower, upper) bounds of a binomial proportion x / n."""
+    """One-sided Clopper-Pearson bounds of a binomial proportion x / n."""
     a = 1.0 - level
     lower = 0.0 if x <= 0 else float(stats.beta.ppf(a, x, n - x + 1))
     upper = 1.0 if x >= n else float(stats.beta.ppf(1.0 - a, x + 1, n - x))
@@ -52,7 +30,6 @@ def cp_bounds(x: int, n: int, level: float = 0.95) -> tuple:
 
 
 def judge(x: int, n: int, threshold: float, kind: str) -> dict:
-    """``kind`` 'coverage' (at least ``threshold``) or 'size' (at most ``threshold``)."""
     lower, upper = cp_bounds(int(x), int(n))
     if kind == 'coverage':
         verdict = '失败' if upper < threshold else '通过' if lower >= threshold else '未定'
@@ -69,8 +46,6 @@ def rate(x: int, n: int) -> dict:
 
 # =========================================================================== errors
 class Errors:
-    """The frozen error scenarios on the base rows (the sample's main M1 rows)."""
-
     def __init__(self, base: pd.DataFrame, spec: est.Spec):
         self.n = len(base)
         self.doc = pd.factorize(base['doc_id'].astype(str))[0]
@@ -111,8 +86,6 @@ def with_row_ids(panel: pd.DataFrame) -> pd.DataFrame:
 
 # =========================================================================== bootstrap procedures (M1, slope)
 class BlockProcedure:
-    """A month-block procedure of :func:`replication.external.estimate.fit_spec` on fixed draws (design-only precomputation)."""
-
     kind = 'bootstrap'
 
     def __init__(self, name: str, panel_r: pd.DataFrame, spec: est.Spec, position: dict, cache: est.DrawCache,
@@ -173,7 +146,7 @@ class BlockProcedure:
         return {nm: {'cov95': 0, 'cov90': 0, 'rej05': 0} for nm in self.items}
 
     def unit_scores(self, E_base: np.ndarray) -> np.ndarray:
-        """H_u = X_u' W e_u per resampling unit: (units, p, replications)."""
+        """H_u = X_u' W e_u per resampling unit."""
         E = E_base[self.rows][self.order]
         r = E.shape[1]
         Hu = np.zeros((self.n_units, self.p, r))
@@ -184,9 +157,6 @@ class BlockProcedure:
         return Hu
 
     def stats(self, E_base: np.ndarray, levels=(0.05, 0.10)) -> dict:
-        """Per estimand and replication (column of ``E_base``): the estimate, the +1 p value and the half-widths at
-        ``levels`` (order statistics of |t* - t|; 'q95' / 'q90' for 0.05 / 0.10), exactly as
-        :func:`replication.external.inference.draw_inference`."""
         Hu = self.unit_scores(E_base)
         Hfull = Hu.sum(axis=0)
         Hstar = np.tensordot(self.M, Hu, axes=(1, 0))                 # (B + R, p, r)
@@ -213,8 +183,6 @@ class BlockProcedure:
 
 # =========================================================================== fixed-design procedures (event study)
 class EventProcedures:
-    """The event-study sensitivity estimators (:mod:`replication.external.escov`) on one shared fixed design."""
-
     kind = 'fixed'
 
     def __init__(self, panel_r: pd.DataFrame, spec: est.Spec, position: dict, estimator_specs: list, cfg: dict):
@@ -272,7 +240,6 @@ class EventProcedures:
                        'tost': {fam: 0 for fam in self.tost_families}} for name in self.estimators}
 
     def stats(self, E_base: np.ndarray) -> tuple:
-        """(event estimates (k, r), {estimator: covariance (r, k, k)}) of the replications in ``E_base``."""
         E = E_base[self.rows]
         Bh = self.A @ E
         resid = E - self.X @ Bh
@@ -319,7 +286,6 @@ class EventProcedures:
 
 # =========================================================================== driver
 def build(panel_r: pd.DataFrame, sample: str, cfg: dict, cache: est.DrawCache) -> tuple:
-    """(base rows, errors, procedures) of one sample."""
     spec = est.main_spec(sample)
     base = est.select(panel_r, spec)
     position = {int(i): k for k, i in enumerate(base['_row'].to_numpy())}
@@ -365,7 +331,6 @@ def summarise_event(events: EventProcedures, name: str, counts: dict, n: int, th
 
 
 def compact(proc_scen: dict) -> tuple:
-    """(by_item, by_joint): scenario -> judgement strings per estimand (the labels attached to the outputs)."""
     by_item, by_joint = {}, {}
     for scen, block in proc_scen.items():
         for nm, v in block['items'].items():
@@ -387,8 +352,6 @@ def verdict_counts(proc_scen: dict) -> dict:
 
 
 def run_honestdid_check(events: EventProcedures, kept: list, cfg: dict) -> dict:
-    """Descriptive: the HonestDiD robust interval at M-bar under the in-restriction deviation path; the rate at which
-    it contains the true target 0 (treatment effect 0), per estimator."""
     hd = cfg['honestdid_in_restriction']
     if events.hd_names is None:
         return {'status': inf.UNAVAILABLE, 'reason': 'the family is not estimable in this window'}
@@ -465,7 +428,6 @@ def simulate_sample(panel: pd.DataFrame, sample: str, cfg: dict | None = None, c
 
 
 def run(panel: pd.DataFrame, progress=None) -> dict:
-    """The simulation record of both samples (design only; no outcome is read)."""
     cfg = external_params('simulation')
     cache = est.DrawCache()
     return {'decision': cfg['decision'], 'rule': cfg, 'outcome_read': False,

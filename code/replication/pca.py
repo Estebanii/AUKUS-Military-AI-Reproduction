@@ -1,8 +1,5 @@
-"""Principal components (scikit-learn PCA, full SVD; deterministic) and the reference axes.
-
-The reference axes are the first 88 principal components of the original vectors of all 37,866 occurrences
-(``sklearn.decomposition.PCA(n_components=88, svd_solver='full')``): their mean, loadings and explained-variance
-ratios. Scores on an axis set are ``(Y - mean) @ components.T``.
+"""Principal components (scikit-learn PCA, full SVD) and the reference axes: the first 88 components of the original
+vectors of all 37,866 occurrences.
 """
 from __future__ import annotations
 
@@ -21,7 +18,6 @@ def fit_pca(Y, n_components=None, svd_solver=None):
 
 
 def k_for_variance(explained_variance_ratio, threshold=None) -> int | None:
-    """Smallest k with cumulative explained variance >= threshold (None if not reached)."""
     threshold = params('pca')['k99_threshold'] if threshold is None else threshold
     cumulative = np.cumsum(explained_variance_ratio)
     hit = np.flatnonzero(cumulative >= threshold)
@@ -29,7 +25,6 @@ def k_for_variance(explained_variance_ratio, threshold=None) -> int | None:
 
 
 def reference_axes(Y) -> dict:
-    """The reference axes: PCA-88 (full SVD) of all rows of ``Y``."""
     pca = fit_pca(Y)
     return {'mean': pca.mean_, 'components': pca.components_, 'explained_variance': pca.explained_variance_,
             'explained_variance_ratio': pca.explained_variance_ratio_, 'singular_values': pca.singular_values_}

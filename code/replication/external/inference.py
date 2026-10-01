@@ -1,32 +1,5 @@
-"""The circular month-block bootstrap, p values and intervals, the MDE tiers, the fake-cutoff
-diagnostic, the v1 document-cluster WCB (historical reference) and the Holm adjustment.
-
-Implementation details of the least-squares, resampling and inference algorithms:
-
-* least squares: minimum-norm weighted least squares (:func:`lstsq_fit`); estimability c'P = c' with c_j = 0 on zero
-  columns (:func:`estimable_direct`); per-unit sufficient statistics (:class:`UnitStats`); batched Jacobi-scaled
-  eigendecomposition with rank ratio 1e-11 and an ambiguity band (:func:`solve_gram`); chunked refits of every draw,
-  ambiguous draws refitted by SVD on the materialised rows (:func:`fit_draws`); the original-sample fit
-  (:func:`point_fit`);
-* resampling: :class:`BlockDraws` (``numpy.random.Generator(PCG64(seed))``, pre starts then post starts, a block of L
-  consecutive units wrapping within its own layer, multiplicities by ``np.add.at``); the layers are the calendar
-  months of each window (2021-09 wholly post), and the replacement draws continue the same generator after the B
-  main draws;
-* inference: :func:`r_max` / :func:`order_stat_quantile` / :func:`draw_inference` (p = (1 + #{|t*-t| >= |t|}) /
-  (B_e + 1); half-width = the order statistic a_(B_e - r), r = ceil(alpha (B_e + 1)) - 2, so "interval excludes 0"
-  <=> "p < alpha") and :func:`holm`; the MDE is the observed-precision MDE (c + z_.80) x SE of the selected test
-  (:func:`replication.external.selection.observed_mde`).
-
-Design failures are judged by the estimability of the target contrast in a draw; a failed draw is replaced by
-the next replacement draw; more than 1% failures (of B) makes the item "不可用", which is never counted as "not
-rejected" (it enters the Holm family with p = 1).
-
-Monthly-score HAC kernel: :func:`bartlett` / :func:`kernel_matrix` give the Bartlett weights k_b(h) = (1 - |h| / b)_+
-over true month distances (no wrap) used by the iid-exact corrected sensitivity estimator of
-:mod:`replication.external.escov`. On the saturated event study the uncorrected monthly-score HAC is biased towards
-zero, so the event-study coefficients are descriptive. Primary M1 and pre-trend slope inference use the methods
-selected by :mod:`replication.external.selection`; month-block bootstrap results are also retained for descriptive
-comparisons.
+"""Least squares, the circular month-block bootstrap, p values and intervals, the Holm adjustment, the Bartlett
+kernel, the document-cluster wild cluster bootstrap and the fake-cutoff diagnostic.
 """
 from __future__ import annotations
 
@@ -47,7 +20,7 @@ UNAVAILABLE = '不可用'
 
 # =========================================================================== least squares
 def lstsq_fit(X, Y, w=None):
-    """Minimum-norm weighted least squares via rank-revealing SVD."""
+    """Minimum-norm weighted least squares via SVD."""
     X = np.asarray(X, dtype=float)
     Y = np.asarray(Y, dtype=float)
     if w is not None:
@@ -58,7 +31,6 @@ def lstsq_fit(X, Y, w=None):
 
 
 def estimable_direct(X, c, w=None, tol=ESTIMABLE_TOL):
-    """Estimability c'P = c' on a materialised (weighted) design, via SVD."""
     X = np.asarray(X, dtype=float)
     if w is not None:
         X = X[np.asarray(w) > 0]
@@ -109,7 +81,6 @@ class UnitStats:
 
 
 def solve_gram(G, H, contrasts: dict, rank_rtol=RANK_RTOL):
-    """Batched minimum-norm solutions and contrast estimability."""
     G = np.asarray(G, dtype=float)
     H = np.asarray(H, dtype=float)
     diag = np.einsum('bii->bi', G)
@@ -144,7 +115,6 @@ def solve_gram(G, H, contrasts: dict, rank_rtol=RANK_RTOL):
 
 
 def fit_draws(unit_stats: UnitStats, M, contrasts: dict, X=None, Y=None, units=None, w=None, chunk=512) -> dict:
-    """Refit for every multiplicity row of M; ambiguous draws fall back to lstsq."""
     M = np.atleast_2d(M)
     out = None
     for start in range(0, len(M), chunk):
@@ -181,7 +151,6 @@ def fit_draws(unit_stats: UnitStats, M, contrasts: dict, X=None, Y=None, units=N
 
 
 def point_fit(X, Y, contrasts: dict, w=None) -> dict:
-    """Original-sample estimates via SVD lstsq plus the estimability of each contrast."""
     Y2 = Y if np.ndim(Y) == 2 else np.asarray(Y)[:, None]
     beta, rank, _ = lstsq_fit(X, Y2, w)
     out = {'rank': rank, 'p': int(X.shape[1]), 'estimates': {}, 'estimable': {}, 'residual': {}}
@@ -197,20 +166,16 @@ def point_fit(X, Y, contrasts: dict, w=None) -> dict:
 
 # =========================================================================== monthly-score HAC kernel and normal inference
 def bartlett(h, b: float) -> np.ndarray:
-    """k_b(h) = (1 - |h| / b)_+: lags 0..b-1 carry weight, |h| >= b none."""
+    """k_b(h) = (1 - |h| / b)_+."""
     return np.clip(1.0 - np.abs(np.asarray(h, dtype=float)) / float(b), 0.0, None)
 
 
 def kernel_matrix(months, b: float) -> np.ndarray:
-    """K[t, u] = k_b(m_t - m_u) over the observed calendar months (true month distances: a month without rows is a
-    gap, never a neighbour; no wrap from the last month to the first). Positive definite (the triangle is a
-    positive-definite function)."""
     m = np.asarray(months, dtype=float)
     return bartlett(m[:, None] - m[None, :], b)
 
 
 def psd_record(V: np.ndarray) -> dict:
-    """The smallest eigenvalue of a covariance relative to its largest (a PSD check; >= -1e-10 expected)."""
     eig = np.linalg.eigvalsh((np.asarray(V, float) + np.asarray(V, float).T) / 2)
     top = float(max(abs(eig.max()), 1e-300))
     return {'min_eigenvalue': float(eig.min()), 'max_eigenvalue': float(eig.max()),
@@ -221,9 +186,6 @@ SINGULAR_REL_TOL = 1e-12
 
 
 def normal_inference(estimate: float, var: float, scale: float | None = None, df: float | None = None) -> dict:
-    """Normal (z; ``df`` None) or Student-t (``df``) inference of one contrast with its variance: two-sided p, 95% and
-    90% intervals. A non-finite variance, a variance <= 0, or one <= 1e-12 x ``scale`` (c' Q^-1 c Var_w(y);
-    numerically zero scores, e.g. an exact fit) is a singular covariance ("不可用"); so is a non-positive df."""
     if not np.isfinite(var) or var <= 0.0 or (scale is not None and var <= SINGULAR_REL_TOL * scale):
         return {'status': UNAVAILABLE, 'estimate': float(estimate),
                 'reason': f'singular covariance (variance {var!r}; scale {scale!r})'}
@@ -241,7 +203,6 @@ def normal_inference(estimate: float, var: float, scale: float | None = None, df
 # =========================================================================== month layers and block draws
 @dataclass(frozen=True)
 class Layers:
-    """Units 0..n_pre-1 (pre layer, calendar order) and n_pre..n_pre+n_post-1 (post layer); ``labels`` in order."""
     labels: tuple
     n_pre: int
     n_post: int
@@ -257,7 +218,6 @@ class Layers:
 
 
 def month_layers(start: str, end: str, first_post: str) -> Layers:
-    """The calendar months of [start, end]; months >= first_post form the post layer (2021-09 whole in post)."""
     from .common import month_index, months
     labels = months(start, end)
     n_pre = sum(1 for m in labels if month_index(m) < month_index(first_post))
@@ -265,7 +225,6 @@ def month_layers(start: str, end: str, first_post: str) -> Layers:
 
 
 def day_layers(start: str, end: str, cut_day: str) -> Layers:
-    """Day-level cut: the cut month is split into '<YYYY-MM>a' (pre) and '<YYYY-MM>b' (post)."""
     from .common import month_index, months
     cut_month = cut_day[:7]
     labels = []
@@ -277,8 +236,6 @@ def day_layers(start: str, end: str, cut_day: str) -> Layers:
 
 @dataclass(frozen=True)
 class BlockDraws:
-    """Circular block draws on one pair of layers; ``pre_starts`` / ``post_starts`` hold the main draws followed by
-    the replacement draws (drawn after the main draws from the same generator)."""
     block_length: int
     B: int
     R: int
@@ -299,7 +256,7 @@ class BlockDraws:
             raise ValueError('the pre layer needs at least one unit')
         rng = np.random.Generator(np.random.PCG64(seed))
         n_pb, n_qb = math.ceil(layers.n_pre / L), math.ceil(layers.n_post / L)
-        if layers.n_post == 0:          # pre-trend slope diagnostic: one layer (pre-signing months only)
+        if layers.n_post == 0:  # slope diagnostic: one layer
             pre = rng.integers(0, layers.n_pre, size=(B, n_pb))
             pre_r = rng.integers(0, layers.n_pre, size=(R, n_pb))
             empty = np.zeros((B + R, 0), dtype=np.int64)
@@ -311,8 +268,6 @@ class BlockDraws:
         return cls(L, B, R, seed, layers, np.vstack([pre, pre_r]), np.vstack([post, post_r]))
 
     def multiplicities(self) -> np.ndarray:
-        """(B + R, units): how often each unit enters each draw (circular blocks within the layer, truncated to the
-        layer length)."""
         L, n_pre, n_post = self.block_length, self.layers.n_pre, self.layers.n_post
         offsets = np.arange(L)
         pre = ((self.pre_starts[:, :, None] + offsets) % n_pre).reshape(len(self.pre_starts), -1)[:, :n_pre]
@@ -336,12 +291,10 @@ class BlockDraws:
 
 
 def failure_cap(B: int) -> int:
-    """At most 1% of B sampling failures."""
     return int(math.floor(external_params('bootstrap')['max_failure_share'] * B))
 
 
 def effective(valid: np.ndarray, B: int) -> dict:
-    """The first B valid draws of the main + replacement sequence; failures counted before B are reached."""
     valid = np.asarray(valid, bool)
     order = np.flatnonzero(valid)
     cap = failure_cap(B)
@@ -372,8 +325,7 @@ def order_stat_quantile(abs_dev, alpha: float):
 
 
 def draw_inference(estimate: float, draws, alpha: float | None = None) -> dict:
-    """p value (+1, centred two-sided tail) and the symmetric absolute-deviation intervals (95%, 90%), with the Monte
-    Carlo errors; ``draws`` are the B_e effective draws."""
+    """p = (1 + #{|t* - t| >= |t|}) / (B_e + 1); half-widths by order statistics."""
     alpha = external_params('bootstrap')['alpha'] if alpha is None else alpha
     d = np.asarray(draws, dtype=float)
     B_e = int(d.size)
@@ -397,8 +349,6 @@ def draw_inference(estimate: float, draws, alpha: float | None = None) -> dict:
 
 
 def holm(pvalues: dict) -> dict:
-    """Holm adjustment over a fixed family: every member stays in the family; a member without a usable p enters
-    with p = 1."""
     filled = {k: (1.0 if v is None else float(v)) for k, v in pvalues.items()}
     items = sorted(((p, k) for k, p in filled.items()), key=lambda t: (t[0], t[1]))
     m = len(items)
@@ -411,7 +361,6 @@ def holm(pvalues: dict) -> dict:
 
 # =========================================================================== MDE
 def tier(mde_sd: float | None) -> dict:
-    """Design tiers."""
     lo, hi = external_params('mde')['tiers_sd']
     if mde_sd is None or not np.isfinite(mde_sd):
         return {'tier': UNAVAILABLE, 'inference': False, 'text': 'MDE 不可用：只作描述'}
@@ -426,9 +375,6 @@ def tier(mde_sd: float | None) -> dict:
 
 # =========================================================================== v1 document-cluster WCB
 def wcb_v1(X, y, clusters, contrasts: dict, pc_index: int, B: int | None = None) -> dict:
-    """The document-cluster wild cluster bootstrap of the main analysis (:func:`replication.analysis.wcb_v1_main_bootstrap`)
-    on this design: Rademacher weights per sorted document, B = 1000, seed 42 + the zero-based PC index;
-    unrestricted residuals. Historical reference only."""
     from ..analysis import wcb_v1_main_bootstrap
     import pandas as pd
     w = external_params('wcb_v1')
@@ -453,14 +399,6 @@ NEEDS = {'theta': ('US', 'UK'), 'delta_UK': ('UK',), 'delta_US': ('US',), 'delta
 
 
 def fake_cutoff_diagnostic(panel, base, responses: list, cache, estimands=('theta', 'delta_UK')) -> dict:
-    """Design (descriptive, fixed in advance): pre-period data only; every month 2016-01..2019-12 with at least
-    18 months after it is a candidate fake cut. Per window, a cut counts for an estimand only if the estimand is
-    estimable there: theta needs US, UK and the control observed on both sides, delta_UK needs UK and the control
-    (AU missing on one side only drops the redundant AU interaction). Month-block inference on the cut's own
-    layers (same seed). The effective denominator, the unavailable cuts and their reasons, and the empirical 5%
-    rejection rate are reported; a rate above 0.10 labels the estimand's month-block inference "校准不佳"
-    (descriptive conclusions). A rate <= 0.10 does not prove valid coverage and does not remove the pre-test
-    limitation (Roth 2022); the rate also mixes in any existing trend."""
     from dataclasses import replace
     from . import estimate as est
     from .common import month_index, months
