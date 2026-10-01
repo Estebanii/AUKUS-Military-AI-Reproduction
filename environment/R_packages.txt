@@ -2,7 +2,7 @@
 # script 07). The script is run with the first `Rscript` on PATH (fallback /usr/local/bin/Rscript).
 # Reference: R version 4.5.0 (2025-04-11), platform aarch64-apple-darwin20.
 # Required: HonestDiD 0.2.8 and jsonlite 2.0.0 (with their dependencies below). Install exactly these versions with
-#   Rscript environment/install_R_packages.R      (README section 3)
+#   Rscript environment/install_R_packages.R      (README section 2)
 # package version (the installed library of the reference machine)
 alabama 2025.1.0
 backports 1.5.0

@@ -22,7 +22,7 @@ for arg in "$@"; do
 done
 
 if [ ! -x "$PYTHON" ]; then
-  echo "Python not found at $PYTHON (create the environment first, see README section 3, or set PYTHON)" >&2
+  echo "Python not found at $PYTHON (create the environment first, see README section 2, or set PYTHON)" >&2
   exit 2
 fi
 DATA="${REPLICATION_DATA:-$HERE/data/bundle}"

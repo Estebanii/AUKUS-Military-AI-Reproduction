@@ -6,10 +6,10 @@ from pathlib import Path
 
 PACKAGE = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PACKAGE / 'code'))
-# Bit-identical reruns: the BLAS thread count is pinned before numpy loads (see README, "随机种子与可重复性"). The
+# Bit-identical reruns: the BLAS thread count is pinned before numpy loads (see README section 6). The
 # reference results were computed with 4 threads for the main analysis and with 12 threads for the external-control
 # analysis (script 07); these defaults reproduce them bit for bit. Other thread counts change results only in the last
-# digits (see README section 7); REPLICATION_BLAS_THREADS overrides the default of every script. The thread variables
+# digits (see README section 6); REPLICATION_BLAS_THREADS overrides the default of every script. The thread variables
 # are always set here (inherited values are overridden).
 DEFAULT_THREADS = {'07_external_control_table9.py': '12'}
 _script = Path(sys.argv[0]).name

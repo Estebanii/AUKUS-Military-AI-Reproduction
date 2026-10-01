@@ -33,7 +33,7 @@ def main(argv=None) -> int:
         print(f'[07] R for HonestDiD: {r_env["rscript"]} {r_env["versions"]}', flush=True)
     elif not args.allow_missing_r:
         print(f'[07] R with HonestDiD and jsonlite is needed for the event-study sensitivity ({r_env["rscript"]}: '
-              f'{r_env["error"]}). Install them (README section 3) or rerun with --allow-missing-r.', flush=True)
+              f'{r_env["error"]}). Install them (README section 2) or rerun with --allow-missing-r.', flush=True)
         return 2
     checks = {}
     full = [data.BASELINE] + (list(data.ALTERNATIVES) if args.all_encoders else [])

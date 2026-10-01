@@ -1,8 +1,8 @@
 """Every random seed and resampling count of the replication, in one place.
 
 All drivers and modules read their seeds from here (``replication.params`` refers to these names); no seed is set
-anywhere else in ``code/`` or ``scripts/``. The README section "随机种子与可重复性 / Random seeds and reproducibility"
-lists, for every stochastic step, the seed, the number of draws, where it is set and which output it affects.
+anywhere else in ``code/`` or ``scripts/``. README section 6 ("随机种子") lists, for every stochastic step, the seed,
+the number of draws and which output it affects.
 
 Rerunning in the pinned environment (``environment/``) with the pinned BLAS thread count reproduces every recomputed
 number bit for bit.

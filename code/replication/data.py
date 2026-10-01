@@ -1,7 +1,7 @@
 """Plain access to the data bundle (see data/README.md for its contents).
 
 The bundle directory is ``data/bundle`` inside the package, or the directory named by the environment variable
-``REPLICATION_DATA``. Every file is listed with its sha256 in ``data/MANIFEST.sha256``; README section 4 shows how to
+``REPLICATION_DATA``. Every file is listed with its sha256 in ``data/MANIFEST.sha256``; README section 3 shows how to
 verify them (shasum -c).
 """
 from __future__ import annotations

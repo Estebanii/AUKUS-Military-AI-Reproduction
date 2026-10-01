@@ -5,7 +5,7 @@
 #       --index-strategy unsafe-best-match --emit-index-url --no-header -o environment/requirements.lock.linux-x86_64
 # and installed with hash checks for this platform, but not run on Linux: bit-identity with the reference results was
 # verified on macOS arm64 only; on other platforms the criterion is agreement at the printed precision (README
-# section 7). Install:
+# section 6). Install:
 #   VIRTUAL_ENV="$PWD/.venv" uv pip sync --require-hashes --index-strategy unsafe-best-match \
 #       environment/requirements.lock.linux-x86_64
 --index-url https://pypi.org/simple
