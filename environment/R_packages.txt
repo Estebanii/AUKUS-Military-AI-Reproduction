@@ -1,0 +1,69 @@
+# R environment of code/replication/external/honest_rm.R (HonestDiD sensitivity of the external-control event study,
+# script 07). The script is run with the first `Rscript` on PATH (fallback /usr/local/bin/Rscript).
+# Reference: R version 4.5.0 (2025-04-11), platform aarch64-apple-darwin20.
+# Required: HonestDiD 0.2.8 and jsonlite 2.0.0 (with their dependencies below). Install exactly these versions with
+#   Rscript environment/install_R_packages.R      (README section 3)
+# package version (the installed library of the reference machine)
+alabama 2025.1.0
+backports 1.5.0
+checkmate 2.3.4
+clarabel 0.11.3
+cli 3.6.5
+codetools 0.2.20
+CVXR 1.9.2
+dplyr 1.1.4
+ECOSolveR 0.6.1
+farver 2.1.2
+foreach 1.5.2
+generics 0.1.4
+ggplot2 4.0.3
+glue 1.8.0
+gmp 0.7.5.1
+graphics 4.5.0
+grDevices 4.5.0
+grid 4.5.0
+gtable 0.3.6
+highs 1.14.0.2
+HonestDiD 0.2.8
+isoband 0.2.7
+iterators 1.0.14
+jsonlite 2.0.0
+labeling 0.4.3
+latex2exp 0.9.8
+lattice 0.22.6
+lifecycle 1.0.4
+lpSolveAPI 5.5.2.0.17.15
+magrittr 2.0.3
+Matrix 1.7.3
+matrixStats 1.5.0
+methods 4.5.0
+mvtnorm 1.4.2
+nleqslv 3.3.7
+numDeriv 2016.8.1.1
+osqp 1.0.0
+pillar 1.11.0
+pkgconfig 2.0.3
+pracma 2.4.6
+purrr 1.1.0
+qrng 0.0.11
+R6 2.6.1
+RColorBrewer 1.1.3
+Rcpp 1.1.0
+RcppArmadillo 14.6.3.1
+RcppEigen 0.3.4.0.2
+Rglpk 0.6.5.1
+rlang 1.1.6
+S7 0.2.2
+scales 1.4.0
+scs 3.2.7
+slam 0.1.56
+spacefillr 0.4.0
+stats 4.5.0
+tibble 3.3.0
+tidyselect 1.2.1
+TruncatedNormal 2.3
+utf8 1.2.6
+utils 4.5.0
+vctrs 0.6.5
+viridisLite 0.4.2
+withr 3.0.2

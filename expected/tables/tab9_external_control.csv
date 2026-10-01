@@ -1,0 +1,11 @@
+panel,encoder,control,estimand,estimate,lo95,hi95,p,inference
+A,DeBERTa-v3-base,Singapore,theta,0.03868374098963326,-0.031850507117936334,0.10921798909720179,0.2688655672163918,simulation-calibrated CR2 cluster-robust inference
+A,DeBERTa-v3-base,Singapore,delta_UK,0.014240769471442016,-0.05793091844786727,0.08641245739075254,0.6941529235382309,simulation-calibrated CR2 cluster-robust inference
+A,DeBERTa-v3-base,Singapore,delta_US,-0.024442971518191244,,,,point estimate only
+A,DeBERTa-v3-base,Canada,theta,0.04117005693066055,-0.03946839619974875,0.12180851006107458,0.2943528235882059,simulation-calibrated CR2 cluster-robust inference
+A,DeBERTa-v3-base,Canada,delta_UK,-0.02939908298689433,-0.12542907982532195,0.06663091385152443,0.5347326336831584,simulation-calibrated CR2 cluster-robust inference
+A,DeBERTa-v3-base,Canada,delta_US,-0.07056913991755488,,,,point estimate only
+B,ModernBERT-large,Singapore,theta,0.05267880222562403,,,,point estimate only
+B,RoBERTa-large,Singapore,theta,0.059856137691836876,,,,point estimate only
+B,Ettin-encoder-1b,Singapore,theta,0.08256536761203156,,,,point estimate only
+B,DeBERTa-v2-xlarge,Singapore,theta,0.06460861682620926,,,,point estimate only

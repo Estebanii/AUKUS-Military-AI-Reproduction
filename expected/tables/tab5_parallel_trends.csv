@@ -1,0 +1,4 @@
+component,wald_chi2_printed,df_printed,p_printed,conclusion_printed,wald_chi2_reproduced,df_reproduced,p_reproduced
+PC1,2.25,7,0.945,未拒绝,2.2507773813556207,7,0.9446673617279705
+PC2,13.29,7,0.065,5%水平未拒绝,13.291140366334453,7,0.0653246302278494
+PC3,12.25,7,0.092,5%水平未拒绝,12.2544137350256,7,0.09249667850584042
